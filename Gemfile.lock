@@ -1,0 +1,42 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    akami (1.0.0)
+      gyoku (>= 0.4.0)
+    builder (3.0.0)
+    epoxy (0.3.1)
+    gyoku (0.4.4)
+      builder (>= 2.1.2)
+    httpi (0.9.6)
+      rack
+    methlab (0.1.0)
+    nokogiri (1.5.2)
+    nori (1.1.0)
+    rack (1.4.1)
+    rdbi (0.9.1)
+      epoxy (>= 0.3.1)
+      methlab (>= 0.0.9)
+      typelib
+    rdbi-driver-odbc (0.1.2)
+      rdbi (~> 0.9)
+      ruby-odbc (= 0.99992)
+    ruby-odbc (0.99992)
+    savon (0.9.9)
+      akami (~> 1.0)
+      builder (>= 2.1.2)
+      gyoku (>= 0.4.0)
+      httpi (~> 0.9)
+      nokogiri (>= 1.4.0)
+      nori (~> 1.1)
+      wasabi (~> 2.1)
+    typelib (0.1.0)
+    wasabi (2.1.0)
+      nokogiri (>= 1.4.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  nokogiri
+  rdbi-driver-odbc
+  savon

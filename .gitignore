@@ -1,0 +1,11 @@
+*~
+tmp
+tmp/*
+*.xml
+*.db
+*.sqlite
+*.sqlite3
+logs
+logs/*
+data
+data/*
