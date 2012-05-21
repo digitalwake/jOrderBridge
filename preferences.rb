@@ -14,18 +14,11 @@ class Preferences
 		
 		#Connect to local sqlite3 database for preferences and local processing
 		#@db_local = RDBI.connect(RDBI::Driver::SQLite3, :database => './data/orderbridge.sqlite3')
-		@db_local = java.sql.DriverManager.getConnection 'jdbc:sqlite:./data/orderbridge.sqlite3'
+		@db_local = DB.new :db => 'sqlite'
 
-		#if @db_local.connected
-			#puts "We're connected to SQLite3"
-			#@db_local.execute("create table if not exists items_to_break (item string)")
-			#@db_local.execute("create table if not exists items_to_weight (item string)")
-		#else
-			#puts "We're not connected to SQLite3"
-		#end
-		@stmt = @db_local.createStatement
-		@stmt.executeUpdate("create table if not exists items_to_break (item string)")
-		@stmt.executeUpdate("create table if not exists items_to_weight (item string)")
+		#@stmt = @db_local.createStatement
+		@db_local.update_qry("create table if not exists items_to_break (item text)")
+		@db_local.update_qry("create table if not exists items_to_weight (item text)")
 	end
 	
 	def maintenance(parms = {})
@@ -57,16 +50,16 @@ class Preferences
 	def get_items_to_break
 		#rs = @db_local.execute("select * from items_to_break").fetch(:all,:Struct)
 		#return rs
-		rs = @stmt.execute("select * from items_to_break")
-		return DB.rs_to_hash(rs)
+		ary = @db_local.qry("select * from items_to_break")
+		return ary
 	end
 	
 	def get_items_weight_to_qty
 		#rs = @db_local.execute("select * from items_to_weight").fetch(:all,:Struct)
 		#return rs
 		#return rs
-		rs = @stmt.executeQuery("select * from items_to_weight")
-		return DB.rs_to_hash(rs)
+		ary = @db_local.qry("select * from items_to_weight")
+		return ary
 	end
 	
 	def item_to_break(candidate)
@@ -75,7 +68,7 @@ class Preferences
 		unless rs.empty? 
 			rs.each do |x|
 				#if candidate.strip == x.item.to_s
-				if candidate.strip == x[:item]
+				if candidate.strip == x['item']
 					return 'EA'
 				end
 			end
@@ -88,9 +81,10 @@ class Preferences
 		unless rs.empty?
 			rs.each do |x|
 				#if candidate.strip == x.item.to_s
-				if candidate.strip == x[:item]
+				if candidate.strip == x['item']
 					#new_qty = qty/(weight*100)
 					new_qty = qty/(weight)
+					puts "candidate = #{candidate}, qty = #{qty}, weight = #{weight}, new_qty = #{new_qty}"
 					#if qty % (weight*100) > 0
 					if qty % (weight) > 0
 						new_qty += 1
@@ -104,11 +98,11 @@ class Preferences
 	
 	protected
 	def delete_from_pref_table(input,tbl)
-		@stmt.executeUpdate("delete from #{tbl} where item = #{input}")
+		@db_local.update_qry("delete from #{tbl} where item = #{input.to_s}")
 	end
 	
 	def add_to_pref_table(input,tbl)
-		@stmt.executeUpdate("insert into #{tbl} (item) values(#{input})")
+		@db_local.update_qry("insert into #{tbl} (item) values(#{input.to_s})")
 	end
 	
 end

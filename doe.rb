@@ -15,7 +15,7 @@ class DoeOrders
 		@end_date = ""
 		@locked_flag = false
 		@boro = ""
-		@cfh = File.open(@@current_log_file, "w")
+		#@cfh = File.open(@@current_log_file, "w")
 		@afh = File.open(@@advanced_log_file, "w")
 	end
 

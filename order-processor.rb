@@ -152,10 +152,11 @@ class OrderProcessor
 		
 		if parms[:advanced]=='N'
 			doe_service.locked_flag = parms[:lock] == 'Y' ? true : false
-			@orders = doe_service.get_current_orders
+			#@orders = doe_service.get_current_orders
 		
 			#Get Current XML orders from the Web Service File
-			doc = Nokogiri::XML(open(doe_service.get_order_filename))		
+			doc = Nokogiri::XML(open(doe_service.get_order_filename))
+			#puts "Order file name is: #{doe_service.get_order_filename}"	
 		else
 			doe_service.end_date = parms[:end_date]
 			doe_service.boro = parms[:boro]
@@ -169,16 +170,8 @@ class OrderProcessor
 		#A NodeSet of the child elements - The DOE WebService names the elements "elements"
 		@ns = doc.xpath("//elements")
 		
-		#Connect to S2K via ODBC and get a handle
-		#@database_handle = RDBI.connect :ODBC, :db => "S2K"
-		#@database_handle ||= java.sql.DriverManager.get_connection("jdbc:as400://S2K/",'NICKRS2K','ti4u0vlj')
-		@database_handle ||= DB.new 'NICKRS2K', 'ti4u0vlj'
-		#@s2k_stmt = @database_handle.createStatement
-		#if @database_handle.connected
-			#puts "We're connected to S2K"
-		#else
-			#puts "We're not connected to S2K"
-		#end
+		#Connect to S2K via JDBC and get a handle
+		@database_handle ||= DB.new :db => 'as400', :user => 'NICKRS2K', :pass => 'ti4u0vlj'
 				
 		#Get item info
 		@item_master = @database_handle.qry("SELECT DISTINCT #{@@library_prefix}MODSDTA.VCOITEM.ONITEM, #{@@library_prefix}MODSDTA.VCOITEM.ONCITM,
@@ -193,12 +186,19 @@ class OrderProcessor
 		#@item_master = @database_handle.rs_to_hash(rs)													
 																						
 		#Clear EDI tables
-		@database_handle.clear_edi(@@library_prefix)
+		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpohw")
+		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpodh")
+		
+		#@item_master.each do |row|
+			#if row.ONCITM.strip == @spec_num.strip
+			#puts row['ONCITM'].end
+		#strip
 				
 	end
 	
 	def get_date(str)
-		new_str = "#{str.slice!(6..9)}#{str.slice!(0..1)}#{str.slice!(3..4)}"
+		new_str = "#{str.slice!(6..9)}#{str.slice!(0..1)}#{str.slice!(1..2)}"
+		puts "#{new_str}"
 		if new_str.include? "/"
 			new_str = 0
 		end
@@ -212,15 +212,15 @@ class OrderProcessor
 		purchased_count = 0
 		@item_master.each do |row|
 			#if row.ONCITM.strip == @spec_num.strip
-			if row[:ONCITM].strip == @spec_num.strip
+			if row['ONCITM'].strip == @spec_num.strip
 				#if row.FICDONATED == 'Y' #and row.ICDEL != 'I'
-				if row[:FICDONATED] == 'Y' #and row.ICDEL != 'I'
+				if row['FICDONATED'] == 'Y' #and row.ICDEL != 'I'
 					donated_count += 1
 				else
 					purchased_count += 1 #unless row.ICDEL = 'I'
 				end
 				#rs << {:item => row.ONITEM.to_s, :weight => row.ICWGHT, :donated => row.FICDONATED}	#unless row.ICDEL = 'I'
-				rs << {:item => row[:ONITEM].to_s, :weight => row[:ICWGHT], :donated => row[:FICDONATED]}
+				rs << {:item => row['ONITEM'].to_s, :weight => row['ICWGHT'].to_f, :donated => row['FICDONATED']}
 				#if row.ICDEL = 'I'
 					#@log.inactive :spec => cust_item, :item => row.ONITEM, :order => order, :qty => qty
 				#end
@@ -271,26 +271,14 @@ class OrderProcessor
 				end
 			end
 		end
+		puts "Item:#{@item} Weight:#{@item_weight}"
 		return true
-		#puts "#{@item} #{@item_weight}"
 	end
 	
 	def drop_ship?(item)
 		@item_master.each do |row|
 			#if row.IFDROP == 'Y'
-			if row[:IFDROP] == 'Y'
-				@drop_ship_item = true
-			else
-				@drop_ship_item = false
-			end
-		end
-		return @drop_ship_item
-	end
-	
-	def weight_to_case?(item)
-		@item_master.each do |row|
-			#if row.IFDROP == 'Y'
-			if row[:IFDROP] == 'Y'
+			if row['IFDROP'] == 'Y'
 				@drop_ship_item = true
 			else
 				@drop_ship_item = false

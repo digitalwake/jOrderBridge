@@ -8,11 +8,15 @@ java_import 'com.ibm.as400.access.AS400JDBCDriver'
 @@library_prefix="T37"
 
 class DB
-	def initialize(user, pass)
-  	@connection ||= java.sql.DriverManager.get_connection("jdbc:as400://S2K/",user, pass)
-  	#rs = @connection.createStatement.executeQuery("SELECT EHCMP,EHTYPE,EHCUST,EHPONO,EHSHIP,EHDDT8 FROM t37files.vedxpohw")
-  	#return rs_to_hash(rs) #.inspect
-		@stmt = @connection.createStatement
+	def initialize(parms = {})
+	  if parms[:db] == 'as400'
+	   	@connection ||= java.sql.DriverManager.get_connection "jdbc:as400://S2K/",parms[:user], parms[:pass]
+  	  #rs = @connection.createStatement.executeQuery("SELECT EHCMP,EHTYPE,EHCUST,EHPONO,EHSHIP,EHDDT8 FROM t37files.vedxpohw")
+  	  #return rs_to_hash(rs) #.inspect
+		 else
+		  @connection ||= java.sql.DriverManager.getConnection 'jdbc:sqlite:./data/orderbridge.sqlite3'
+		 end
+		 @stmt = @connection.createStatement
 	end
 
 	def qry(sql)
@@ -22,12 +26,10 @@ class DB
 		return rs
 	end
 	
-	def clear_edi(lib)
-	  @stmt ||= @connection.createStatement
-	  @stmt.executeUpdate("delete from #{lib}files.vedxpohw")
-		@stmt.executeUpdate("delete from #{lib}files.vedxpodh")
+	def update_qry(sql)
+		@stmt.executeUpdate(sql)
 	end
-
+	
 	def rs_to_hash(resultset)
   	meta = resultset.meta_data
   	rows = []
@@ -72,7 +74,7 @@ class DB
 	end
 	
 	def disconnect
-	  @stmt.finish
+	  @stmt.close
 	  @connection.close
 	 end
 end
