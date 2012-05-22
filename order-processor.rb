@@ -152,7 +152,7 @@ class OrderProcessor
 		
 		if parms[:advanced]=='N'
 			doe_service.locked_flag = parms[:lock] == 'Y' ? true : false
-			#@orders = doe_service.get_current_orders
+			@orders = doe_service.get_current_orders
 		
 			#Get Current XML orders from the Web Service File
 			doc = Nokogiri::XML(open(doe_service.get_order_filename))
