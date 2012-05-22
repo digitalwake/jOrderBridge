@@ -1,14 +1,17 @@
 source 'http://rubygems.org'
 
 # gem 'rails', '3.1.3'
+gem 'sinatra'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
 gem 'savon'
-gem 'rdbi-driver-odbc'
+#gem 'rdbi-driver-odbc'
 gem 'nokogiri'
 #gem 'open-uri'
+gem 'jruby-openssl'
+gem 'jdbc-sqlite3'
 
 
 # Gems used only for assets and not required
