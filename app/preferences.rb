@@ -9,7 +9,8 @@ org.sqlite.JDBC
 class Preferences
 
 	def initialize
-		Dir.mkdir('../data') unless File.directory?('../data')
+	  @@current_directory = Dir.getwd
+		Dir.mkdir('data') unless File.directory?('data')
 		#Database.new('./data/orderbridge.sqlite3') unless File.exists?('./data/orderbridge.sqlite3')
 		
 		#Connect to local sqlite3 database for preferences and local processing

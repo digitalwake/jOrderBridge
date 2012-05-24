@@ -1,5 +1,5 @@
 require 'java'
-require './lib/jt400-6.1'
+require 'lib/jt400-6.1'
 require 'date'
 require 'bigdecimal'
 
@@ -9,12 +9,14 @@ java_import 'com.ibm.as400.access.AS400JDBCDriver'
 
 class DB
 	def initialize(parms = {})
+	  @@current_directory = Dir.getwd
+	  puts "$$$$$$ CURRENT DIRECTORY = #{@@current_directory} $$$$$$$$$$"
 	  if parms[:db] == 'as400'
 	   	@connection ||= java.sql.DriverManager.get_connection "jdbc:as400://S2K/",parms[:user], parms[:pass]
   	  #rs = @connection.createStatement.executeQuery("SELECT EHCMP,EHTYPE,EHCUST,EHPONO,EHSHIP,EHDDT8 FROM t37files.vedxpohw")
   	  #return rs_to_hash(rs) #.inspect
 		 else
-		  @connection ||= java.sql.DriverManager.getConnection 'jdbc:sqlite:../data/orderbridge.sqlite3'
+		  @connection ||= java.sql.DriverManager.getConnection "jdbc:sqlite:#{@@current_directory}/data/orderbridge.sqlite3"
 		 end
 		 @stmt = @connection.createStatement
 	end

@@ -1,0 +1,30 @@
+<!doctype html>  
+<head>  
+  <meta charset="utf-8">  
+  <title>OrderBridge 2.0</title>  
+  <meta name="description" content="Welcome to my basic template.">  
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap/css/bootstrap.css" media="screen">  
+<!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <header class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a href="#">Home</a>
+          <nav>
+            <ul class="nav pull-right">
+              <li><%= link_to "Home",    :path_only %></li>
+              <li><%= link_to "Help",    :path_only %></li>
+              <li><%= link_to "Sign in", :path_only %></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <%= yield %>
+    </div>
+  </body>
+</html>

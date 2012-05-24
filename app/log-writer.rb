@@ -1,11 +1,11 @@
 class LogWriter
 
-@@warning_file = "../logs/warnings_#{Time.now.strftime("%Y%m%d.txt")}"
-@@error_file = "../logs/errors_#{Time.now.strftime("%Y%m%d.txt")}"
-@@inactive_item_file = "../logs/inactive_items_#{Time.now.strftime("%Y%m%d.txt")}"
+@@warning_file = "logs/warnings_#{Time.now.strftime("%Y%m%d.txt")}"
+@@error_file = "logs/errors_#{Time.now.strftime("%Y%m%d.txt")}"
+@@inactive_item_file = "logs/inactive_items_#{Time.now.strftime("%Y%m%d.txt")}"
 
 	def initialize
-		Dir.mkdir('../logs') unless File.directory?('../logs')
+		Dir.mkdir('logs') unless File.directory?('logs')
 		#File.new(@@warning_file)
 		#File.new(@@error_file)
 		@wfh = File.open(@@warning_file, "w")

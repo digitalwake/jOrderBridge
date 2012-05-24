@@ -1,10 +1,4 @@
-require 'app/order-processor.rb'
 require 'sinatra/base'
-
-class OrderBridge < Sinatra::Base
-	
-session = OrderProcessor.new
-@@current_directory = Dir.getwd
 
 helpers do
   # Construct a link to +url_fragment+, which should be given relative to
@@ -37,10 +31,3 @@ helpers do
     "#{base}#{url_fragment}"
   end
 end
-
-  get "/" do
-    erb :home
-  end
-
-end
-
