@@ -12,12 +12,11 @@
     <header class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a href="#">Home</a>
           <nav>
             <ul class="nav pull-right">
-              <li><%= link_to "Home",    :path_only %></li>
-              <li><%= link_to "Help",    :path_only %></li>
-              <li><%= link_to "Sign in", :path_only %></li>
+              <li><%= link_to home_url,"Home" %></li>
+              <li><%= link_to help_url,"Help" %></li>
+              <li><%= link_to login_url,"Login" %></li>
             </ul>
           </nav>
         </div>

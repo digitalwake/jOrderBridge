@@ -1,45 +1,49 @@
 require 'app/order-processor.rb'
+require 'lib/sinatra/helpers.rb'
 require 'sinatra/base'
 
 class OrderBridge < Sinatra::Base
+
+helpers Sinatra::Helpers
 	
 session = OrderProcessor.new
 @@current_directory = Dir.getwd
 
-helpers do
-  # Construct a link to +url_fragment+, which should be given relative to
-  # the base of this Sinatra app.  The mode should be either
-  # <code>:path_only</code>, which will generate an absolute path within
-  # the current domain (the default), or <code>:full_url</code>, which will
-  # include the site name and port number.  The latter is typically necessary
-  # for links in RSS feeds.  Example usage:
-  #
-  #   link_to "/foo" # Returns "http://example.com/myapp/foo"
-  #
-  #--
-  # Thanks to cypher23 on #mephisto and the folks on #rack for pointing me
-  # in the right direction.
-  def link_to url_fragment, mode=:path_only
-    case mode
-    when :path_only
-      base = request.script_name
-    when :full_url
-      if (request.scheme == 'http' && request.port == 80 ||
-          request.scheme == 'https' && request.port == 443)
-        port = ""
-      else
-        port = ":#{request.port}"
-      end
-      base = "#{request.scheme}://#{request.host}#{port}#{request.script_name}"
-    else
-      raise "Unknown script_url mode #{mode}"
-    end
-    "#{base}#{url_fragment}"
-  end
-end
-
   get "/" do
     erb :home
+  end
+  
+  get "/advanced" do
+    erb :advanced
+  end
+  
+  post "/advanced" do
+    success = false
+    puts "The form has posted."
+    puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}"
+    puts "Connecting and downloading orders"
+    session.prepare :doe_user => params[:user],
+                    :doe_pass => params[:pass],
+                    :advanced => 'Y',
+                    :date => params[:from_date],
+                    :end_date => params[:to_date]
+                    
+    puts "Processing orders and uploading to S2K"
+    success = session.process
+    puts "Closing connections"
+    session.close
+    puts "Processing complete"
+    
+    if success
+      #change this to a redirect
+      erb :success 
+    else
+      erb :fail
+    end
+  end
+  
+  get "/current" do
+    erb :current
   end
 
 end

@@ -123,6 +123,14 @@ class OrderProcessor
 			puts "We're outta here"
 		end
 		#puts "OrderProcessor::processAdvancedOrders called"
+		
+		puts "Preparing Connections and Downloading Orders..."
+		self.prepare(parms)
+		puts "Processing Orders..."
+		self.process
+		puts "Closing Connections"
+		self.close
+		puts "Processing Complete"
 	end
 	
 	def maintain_items_to_break
@@ -142,12 +150,12 @@ class OrderProcessor
     #@log.close
 	end
 	
-	protected
+	#protected
 	def prepare(parms = {})
 			
 		doe_service = DoeOrders.new
-		doe_service.pass = @doe_pass
-		doe_service.vendor_id = @doe_user
+		doe_service.pass = parms[:doe_pass]
+		doe_service.vendor_id = parms[:doe_user]
 		doe_service.date = parms[:date]
 		
 		if parms[:advanced]=='N'
@@ -345,6 +353,7 @@ class OrderProcessor
 				@writer.write_order_header(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
 			end
 		end
+		return true
   end
 	#private_class_method :prepare, :process_order_header, :process_order_detail
 end
