@@ -10,7 +10,7 @@ java_import 'com.ibm.as400.access.AS400JDBCDriver'
 class DB
 	def initialize(parms = {})
 	  @@current_directory = Dir.getwd
-	  puts "$$$$$$ CURRENT DIRECTORY = #{@@current_directory} $$$$$$$$$$"
+	  #puts "$$$$$$ CURRENT DIRECTORY = #{@@current_directory} $$$$$$$$$$"
 	  if parms[:db] == 'as400'
 	   	@connection ||= java.sql.DriverManager.get_connection "jdbc:as400://S2K/",parms[:user], parms[:pass]
   	  #rs = @connection.createStatement.executeQuery("SELECT EHCMP,EHTYPE,EHCUST,EHPONO,EHSHIP,EHDDT8 FROM t37files.vedxpohw")
