@@ -6,7 +6,7 @@ require 'app/db'
 
 org.sqlite.JDBC
 
-class Preferences
+class AppData
 
 	def initialize
 	  @@current_directory = Dir.getwd
@@ -20,6 +20,8 @@ class Preferences
 		#@stmt = @db_local.createStatement
 		@db_local.update_qry("create table if not exists items_to_break (item text)")
 		@db_local.update_qry("create table if not exists items_to_weight (item text)")
+		@db_local.update_qry("create table if not exists warnings (order_date date, customer text, ship_to text, item text, cust_item text,created date)")
+		@db_local.update_qry("create table if not exists errors (order_date date, customer text, ship_to text, item text, cust_item text,created date)")
 	end
 	
 	def maintenance(parms = {})

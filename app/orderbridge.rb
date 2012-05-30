@@ -45,6 +45,31 @@ session = OrderProcessor.new
   get "/current" do
     erb :current
   end
+  
+  post "/current" do
+    success = false
+    puts "The form has posted."
+    puts "The date was: #{params[:date]}"
+    puts "Connecting and downloading orders"
+    session.prepare :doe_user => params[:user],
+                    :doe_pass => params[:pass],
+                    :advanced => 'N',
+                    :lock => 'N',
+                    :date => params[:date]
+                    
+    puts "Processing orders and uploading to S2K"
+    success = session.process
+    puts "Closing connections"
+    session.close
+    puts "Processing complete"
+    
+    if success
+      #change this to a redirect
+      erb :success 
+    else
+      erb :fail
+    end
+  end
 
 end
 

@@ -7,7 +7,7 @@ require 'app/db'
 require 'java'
 require 'app/doe.rb'
 require 'app/order-writer.rb'
-require 'app/preferences.rb'
+require 'app/app-data.rb'
 require 'app/log-writer.rb'
 
 class OrderProcessor
@@ -16,7 +16,7 @@ class OrderProcessor
 
 	def initialize
 		@writer = OrderWriter.new
-		@prefs = Preferences.new
+		@data = AppData.new
 		@log = LogWriter.new
 		@orders_processed = 0
 		@purchase_order = 0
@@ -134,11 +134,11 @@ class OrderProcessor
 	end
 	
 	def maintain_items_to_break
-		@prefs.maintenance :type => "broken"
+		@data.maintenance :type => "broken"
 	end
 	
 	def maintain_items_to_weight
-		@prefs.maintenance :type => "weight"
+		@data.maintenance :type => "weight"
 	end
 	
 	def close
@@ -323,7 +323,7 @@ class OrderProcessor
 				
 				#Iterate while looking for Drop Shipments
 				@item = "0" unless self.set_s2k_item_and_weight
-				unit =  @prefs.item_to_break(@item)
+				unit =  @data.item_to_break(@item)
 				#puts "uom = #{unit}"
 				if unit == 'EA'
 					unless @item.include? "-BC"	
@@ -331,7 +331,7 @@ class OrderProcessor
 						@item += "-BC"
 					end
 				end
-				@qty = @prefs.item_weight_to_qty(@item, @qty, @item_weight)
+				@qty = @data.item_weight_to_qty(@item, @qty, @item_weight)
 				if drop_ship?(@item)
 					drop_ship_orderline += 1
 					@drop_ship = true
