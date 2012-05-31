@@ -11,17 +11,13 @@ class AppData
 	def initialize
 	  @@current_directory = Dir.getwd
 		Dir.mkdir('data') unless File.directory?('data')
-		#Database.new('./data/orderbridge.sqlite3') unless File.exists?('./data/orderbridge.sqlite3')
 		
 		#Connect to local sqlite3 database for preferences and local processing
-		#@db_local = RDBI.connect(RDBI::Driver::SQLite3, :database => './data/orderbridge.sqlite3')
 		@db_local = DB.new :db => 'sqlite'
 
-		#@stmt = @db_local.createStatement
 		@db_local.update_qry("create table if not exists items_to_break (item text)")
 		@db_local.update_qry("create table if not exists items_to_weight (item text)")
-		@db_local.update_qry("create table if not exists warnings (order_date date, customer text, ship_to text, item text, cust_item text,created date)")
-		@db_local.update_qry("create table if not exists errors (order_date date, customer text, ship_to text, item text, cust_item text,created date)")
+		@db_local.update_qry("create table if not exists log (log_type char, log_code char, order_date date, customer text, ship_to text, item text, item_dsc text, cust_item text,created date)")
 	end
 	
 	def maintenance(parms = {})
@@ -51,17 +47,22 @@ class AppData
 	end
 	
 	def get_items_to_break
-		#rs = @db_local.execute("select * from items_to_break").fetch(:all,:Struct)
-		#return rs
 		ary = @db_local.qry("select * from items_to_break")
 		return ary
 	end
 	
 	def get_items_weight_to_qty
-		#rs = @db_local.execute("select * from items_to_weight").fetch(:all,:Struct)
-		#return rs
-		#return rs
 		ary = @db_local.qry("select * from items_to_weight")
+		return ary
+	end
+	
+	def get_warnings(params = {})
+		ary = @db_local.qry("select * from log where log_type = 'W' and order_date = params[:date]")
+		return ary
+	end
+	
+	def get_errors(params = {})
+		ary = @db_local.qry("select * from log where log_type = 'E' and order_date = params[:date]")
 		return ary
 	end
 	
@@ -99,6 +100,16 @@ class AppData
 		return qty
 	end
 	
+	def log(parms = {})
+	  values= "'#{parms[:type]}', '#{parms[:code]}', #{parms[:date]}, '#{parms[:cust]}', '#{parms[:ship]}', '#{parms[:cust_item]}', '#{parms[:item_dsc]}', #{Time.now.strftime("%F")}"
+		
+		self.add_to_log_table(values)
+	end
+	
+	def close
+	  @db_local.disconnect
+	end
+	
 	protected
 	def delete_from_pref_table(input,tbl)
 		@db_local.update_qry("delete from #{tbl} where item = #{input.to_s}")
@@ -106,6 +117,11 @@ class AppData
 	
 	def add_to_pref_table(input,tbl)
 		@db_local.update_qry("insert into #{tbl} (item) values(#{input.to_s})")
+	end
+	
+	def add_to_log_table(input)
+	  #puts "The SQL is: insert into log (log_type, log_code, order_date, customer, ship_to, cust_item, item_dsc, created) values(#{input})"
+		@db_local.update_qry("insert into log (log_type, log_code, order_date, customer, ship_to, cust_item, item_dsc, created) values(#{input})")
 	end
 	
 end

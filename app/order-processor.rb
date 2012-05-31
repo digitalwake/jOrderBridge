@@ -17,7 +17,7 @@ class OrderProcessor
 	def initialize
 		@writer = OrderWriter.new
 		@data = AppData.new
-		@log = LogWriter.new
+		#@log = LogWriter.new
 		@orders_processed = 0
 		@purchase_order = 0
 		@delivery_date = 0
@@ -142,10 +142,8 @@ class OrderProcessor
 	end
 	
 	def close
-		#@cust_items.finish
-		#@item_master.finish
 		@database_handle.disconnect
-		#@db_local.disconnect
+		@data.close
 		puts "#{@writer.orders} Orders Processed with a total of #{@writer.total_order_lines} order lines."
     #@log.close
 	end
@@ -179,7 +177,7 @@ class OrderProcessor
 		@ns = doc.xpath("//elements")
 		
 		#Connect to S2K via JDBC and get a handle
-		@database_handle ||= DB.new :db => 'as400', :user => 'NICKRS2K', :pass => 'ti4u0vlj'
+		@database_handle ||= DB.new :db => 'as400', :user => parms[:user], :pass => parms[:pass]
 				
 		#Get item info
 		@item_master = @database_handle.qry("SELECT DISTINCT #{@@library_prefix}MODSDTA.VCOITEM.ONITEM, #{@@library_prefix}MODSDTA.VCOITEM.ONCITM,
@@ -196,11 +194,6 @@ class OrderProcessor
 		#Clear EDI tables
 		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpohw")
 		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpodh")
-		
-		#@item_master.each do |row|
-			#if row.ONCITM.strip == @spec_num.strip
-			#puts row['ONCITM'].end
-		#strip
 				
 	end
 	
@@ -229,45 +222,45 @@ class OrderProcessor
 				end
 				#rs << {:item => row.ONITEM.to_s, :weight => row.ICWGHT, :donated => row.FICDONATED}	#unless row.ICDEL = 'I'
 				rs << {:item => row['ONITEM'].to_s, :weight => row['ICWGHT'].to_f, :donated => row['FICDONATED']}
-				#if row.ICDEL = 'I'
-					#@log.inactive :spec => cust_item, :item => row.ONITEM, :order => order, :qty => qty
-				#end
 			end
 		end
 		
-		#If we have no results exit with a failure
+		#If we have no results log the error and exit with a failure
 		if rs.empty?
-			@log.error :cust => @cust_num,
+			@data.log  :type => 'E',
+			           :cust => @cust_num,
 								 :ship => @ship_to,
 								 :order => @purchase_order,
-								 :item => @spec_num,
+								 :cust_item => @spec_num,
                  :item_dsc => @item_dsc,
 								 :qty  => @qty,
 								 :date => @delivery_date,
-								 :msg => "No Active Item Found"
+								 :code => '0'
 								 
 			return false
 		else
 			if donated_count > 1
-				@log.warning rs, :cust => @cust_num,
-								 		 :ship => @ship_to,
-								 		 :order => @purchase_order,
-								 		 :date => @delivery_date,
-								 		 :qty  => @qty,
-								 		 :item => @spec_num,
-                     :item_dsc => @item_dsc,
-								 		 :msg => "Too many Donated Matches"
+				@data.log :type => 'W',
+				          :cust => @cust_num,
+								 	:ship => @ship_to,
+								 	:order => @purchase_order,
+								 	:date => @delivery_date,
+								 	:qty  => @qty,
+								 	:cust_item => @spec_num,
+                  :item_dsc => @item_dsc,
+								 	:code => 'D'
 			end
 			
 			if purchased_count > 1
-				@log.warning rs, :cust => @cust_num,
-								 		 :ship => @ship_to,
-								 		 :order => @purchase_order,
-								 		 :date => @delivery_date,
-								 		 :qty  => @qty,
-								 		 :item => @spec_num,
-                     :item_dsc => @item_dsc,
-								 		 :msg => "Too many Purchased Matches"
+				@data.log :type => 'W',
+				          :cust => @cust_num,
+								 	:ship => @ship_to,
+								 	:order => @purchase_order,
+								 	:date => @delivery_date,
+								 	:qty  => @qty,
+								 	:cust_item => @spec_num,
+                  :item_dsc => @item_dsc,
+								 	:code => 'P'
 			end
 				 	
 			rs.each do |hsh|

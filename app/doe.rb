@@ -64,12 +64,6 @@ class DoeOrders
 			soap.env_namespace = 'soap12'
 		end
 
-		#File.new(@@current_log_file) unless File.exists?(@@current_log_file)
-		#File.open(@@current_log_file,"w") do |f|
-			#f.puts "Started at #{Time.now} Order Lock = #{:locked_flag}"
-			#f.puts response.http
-			#f.puts response.to_xml
-		#end
 		@cfh.puts response.to_xml
 		@cfh.close
 		return response.to_xml
@@ -82,11 +76,8 @@ class DoeOrders
 
 		File.open(@@wsdl_info,'w') do |f|
 			f.puts "WSDL query started at #{Time.now}"
-			#f.prints "Namespace: "
 			f.puts client.wsdl.namespace
-			#f.prints "Endpoint: "
 			f.puts client.wsdl.endpoint
-			#f.prints "Actions: "
 			f.puts client.wsdl.soap_actions
 		end
 
@@ -108,12 +99,7 @@ class DoeOrders
 			}
 			soap.env_namespace = 'soap12'
 		end
-
-		#File.open(@@advanced_log_file,'w') do |f|
-			#f.puts "test started at #{Time.now}"
-			#f.puts response.http
-			#f.puts response.to_xml
-		#end
+		
 		@afh.puts response.to_xml
 		@afh.close
 		return response.to_xml

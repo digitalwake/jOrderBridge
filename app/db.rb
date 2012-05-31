@@ -78,5 +78,5 @@ class DB
 	def disconnect
 	  @stmt.close
 	  @connection.close
-	 end
+	end
 end
