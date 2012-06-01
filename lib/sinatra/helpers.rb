@@ -20,6 +20,19 @@ module Sinatra
     def help_url
       "/help"
     end
+    
+    def log_url
+      "/log"
+    end
+    
+    def logs_url
+      "/logs"
+    end
+    
+    def preferences_url
+      "/preferences"
+    end
+    
   end
   
   helpers Helpers

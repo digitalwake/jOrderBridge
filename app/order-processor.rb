@@ -68,6 +68,10 @@ class OrderProcessor
 		return true
 	end
 	
+	def get_log
+	  return @data
+	end
+	
 	def process_current_orders
 		puts "*--------- Current Orders ----------*"
 		print "            Enter Date [MM/DD/YYYY]:"

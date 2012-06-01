@@ -1,0 +1,15 @@
+<div class="center hero-unit">
+  <h1>View Logs</h1>
+
+  <h2>
+    This is where you can select logs from program runs to view. 
+  </h2>
+  <p>Please specify the order date you wish to view</p>
+  
+  <form action="/log" method="post">
+  Order date to view (MM/DD/YYYY): <input type="text" name="date" /><br />
+  <input type="radio" name="log_type" value='E' /> Errors<br />
+  <input type="radio" name="log_type" value='W' /> Warnings<br />
+  <input type="submit" value="Submit" />
+    
+</div>

@@ -1,0 +1,25 @@
+<div class="center hero-unit">
+  <h1><%= @log_type.capitalize %></h1>
+
+  <h2>
+    This is a list of <%= @log_type %> for the given order date and item number. 
+  </h2>
+  <table>
+  <tr>
+  <% @data[0].each_key do |col| %>
+    <td><%= col %></td>
+    <% end %>
+    <td>&nbsp;</td>
+  </tr>
+  <% @data.each do |hsh| %>
+    <tr>
+    <% hsh.each_value do |val| %>
+      <td><%= val %></td>
+      <% end %>
+    </tr>
+  <% end %>
+  </table>
+  
+  <p><%= link_to log_url, "<- Go Back" %></p>
+    
+</div>
