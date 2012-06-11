@@ -1,5 +1,3 @@
-#require 'rdbi'
-#require 'rdbi-driver-odbc'
 require 'rubygems'
 require 'savon'
 require 'nokogiri'
@@ -27,6 +25,7 @@ class OrderProcessor
 		@spec_num = ""
 		@qty= 0
 		@drop_ship = false
+		@advanced = false
 		@item=""
 		@item_dsc=""
 		@item_weight=0.00
@@ -68,7 +67,7 @@ class OrderProcessor
 		return true
 	end
 	
-	def get_log
+	def get_data
 	  return @data
 	end
 	
@@ -146,7 +145,7 @@ class OrderProcessor
 	end
 	
 	def close
-		@database_handle.disconnect
+		@database_handle.close
 		@data.close
 		puts "#{@writer.orders} Orders Processed with a total of #{@writer.total_order_lines} order lines."
     #@log.close
@@ -161,6 +160,7 @@ class OrderProcessor
 		doe_service.date = parms[:date]
 		
 		if parms[:advanced]=='N'
+		  @advanced = false
 			doe_service.locked_flag = parms[:lock] == 'Y' ? true : false
 			@orders = doe_service.get_current_orders
 		
@@ -168,6 +168,7 @@ class OrderProcessor
 			doc = Nokogiri::XML(open(doe_service.get_order_filename))
 			#puts "Order file name is: #{doe_service.get_order_filename}"	
 		else
+		  @advanced = true
 			doe_service.end_date = parms[:end_date]
 			doe_service.boro = parms[:boro]
 			
@@ -198,6 +199,7 @@ class OrderProcessor
 		#Clear EDI tables
 		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpohw")
 		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpodh")
+		
 				
 	end
 	
@@ -231,7 +233,8 @@ class OrderProcessor
 		
 		#If we have no results log the error and exit with a failure
 		if rs.empty?
-			@data.log  :type => 'E',
+		  unless @advanced == true
+			  @data.log  :type => 'E',
 			           :cust => @cust_num,
 								 :ship => @ship_to,
 								 :order => @purchase_order,
@@ -240,11 +243,12 @@ class OrderProcessor
 								 :qty  => @qty,
 								 :date => @delivery_date,
 								 :code => '0'
-								 
+			  end
 			return false
 		else
 			if donated_count > 1
-				@data.log :type => 'W',
+			  unless @advanced == true
+				  @data.log :type => 'W',
 				          :cust => @cust_num,
 								 	:ship => @ship_to,
 								 	:order => @purchase_order,
@@ -253,10 +257,12 @@ class OrderProcessor
 								 	:cust_item => @spec_num,
                   :item_dsc => @item_dsc,
 								 	:code => 'D'
+				end
 			end
 			
 			if purchased_count > 1
-				@data.log :type => 'W',
+			  unless @advanced == true
+				  @data.log :type => 'W',
 				          :cust => @cust_num,
 								 	:ship => @ship_to,
 								 	:order => @purchase_order,
@@ -265,6 +271,7 @@ class OrderProcessor
 								 	:cust_item => @spec_num,
                   :item_dsc => @item_dsc,
 								 	:code => 'P'
+			  end
 			end
 				 	
 			rs.each do |hsh|
@@ -350,6 +357,7 @@ class OrderProcessor
 				@writer.write_order_header(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
 			end
 		end
+		#@database_handle.close
 		return true
   end
 	#private_class_method :prepare, :process_order_header, :process_order_detail

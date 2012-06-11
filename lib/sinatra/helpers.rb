@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'app/app-data.rb'
 
 module Sinatra
   module Helpers

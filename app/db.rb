@@ -22,9 +22,9 @@ class DB
 	end
 
 	def qry(sql)
+		#@stmt.reset
 		temp = @stmt.executeQuery(sql)
 		rs = self.rs_to_hash(temp)
-		#@stmt.close
 		return rs
 	end
 	
@@ -75,8 +75,16 @@ class DB
   	rows
 	end
 	
+	def close
+	  @stmt.close
+	  @connection.close
+	  @connection.finalize
+	end
+	
+	
 	def disconnect
 	  @stmt.close
 	  @connection.close
+	  @connection.finalize
 	end
 end
