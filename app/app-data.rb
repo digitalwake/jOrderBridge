@@ -100,7 +100,7 @@ class AppData
 				if candidate.strip == x['item']
 					#new_qty = qty/(weight*100)
 					new_qty = qty/(weight)
-					puts "candidate = #{candidate}, qty = #{qty}, weight = #{weight}, new_qty = #{new_qty}"
+					#puts "candidate = #{candidate}, qty = #{qty}, weight = #{weight}, new_qty = #{new_qty}"
 					#if qty % (weight*100) > 0
 					if qty % (weight) > 0
 						new_qty += 1

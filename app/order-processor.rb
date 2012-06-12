@@ -205,14 +205,14 @@ class OrderProcessor
 	
 	def get_date(str)
 		new_str = "#{str.slice!(6..9)}#{str.slice!(0..1)}#{str.slice!(1..2)}"
-		puts "#{new_str}"
+		#puts "#{new_str}"
 		if new_str.include? "/"
 			new_str = 0
 		end
 		return new_str
 	end
 	
-	def set_s2k_item_and_weight(item_desc)
+	def set_s2k_item_and_weight
 		rs = []
 		item_found = false
 		donated_count = 0
@@ -239,7 +239,7 @@ class OrderProcessor
 								 :ship => @ship_to,
 								 :order => @purchase_order,
 								 :cust_item => @spec_num,
-                 :item_dsc => item_dsc,
+                 :item_dsc => @item_dsc,
 								 :qty  => @qty,
 								 :date => @delivery_date,
 								 :code => '0'
@@ -283,7 +283,7 @@ class OrderProcessor
 				end
 			end
 		end
-		puts "Item:#{@item} Weight:#{@item_weight}"
+		#puts "Item:#{@item} Weight:#{@item_weight}"
 		return true
 	end
 	
@@ -301,7 +301,7 @@ class OrderProcessor
 	
   def process
 		#Iterate through the orders (elements marked "elements")
-		puts "Process called."
+		#puts "Process called."
 		i=0
 		@ns.each do |node| 
 			@purchase_order = node.at_xpath("order_id").content
@@ -326,7 +326,7 @@ class OrderProcessor
 				@item_dsc = child['item_name']
 				
 				#Iterate while looking for Drop Shipments
-				@item = "0" unless self.set_s2k_item_and_weight node.at_xpath("item_name").content
+				@item = "0" unless self.set_s2k_item_and_weight
 				unit =  @data.item_to_break(@item)
 				#puts "uom = #{unit}"
 				if unit == 'EA'

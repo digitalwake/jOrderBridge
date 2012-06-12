@@ -58,8 +58,6 @@ class OrderBridge < Sinatra::Base
   post "/current" do
     app = OrderProcessor.new
     success = false
-    puts "The form has posted."
-    puts "The date was: #{params[:date]}"
     puts "Connecting and downloading orders"
     app.prepare :doe_user => params[:user],
                     :doe_pass => params[:pass],

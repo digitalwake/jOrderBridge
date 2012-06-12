@@ -30,6 +30,14 @@ class DoeOrders
 	attr_accessor :vendor_id, :pass, :date, :end_date, :locked_flag, :boro
 
 	def get_current_orders
+	  Savon.configure do |config|
+	    config.log = false
+      #config.log_level = :error      # changing the log level
+      HTTPI.log = false
+    end
+    
+    #HTTPI.log = false
+    
 		client = Savon::Client.new do 
 		wsdl.document = "http://www.opt-osfns.org/osfns/resources/sfordering/SFWebService.asmx?WSDL"
 		end
@@ -70,6 +78,14 @@ class DoeOrders
 	end
 	
 	def get_advanced_orders
+	  Savon.configure do |config|
+	    config.log = false
+      #config.log_level = :error      # changing the log level
+      HTTPI.log = false
+    end
+    
+    #HTTPI.log = false
+    
 		client = Savon::Client.new do 
 		wsdl.document = "http://www.opt-osfns.org/osfns/resources/sfordering/SFWebService.asmx?WSDL"
 		end
