@@ -6,9 +6,10 @@ require 'sinatra/base'
 class OrderBridge < Sinatra::Base
 
   helpers Sinatra::Helpers
+  use Rack::MethodOverride
 
   #app = OrderProcessor.new
-  @app_data = AppData.new
+  #@app_data = AppData.new
   @@current_directory = Dir.getwd
   @@current_log_date = 0
   
@@ -166,18 +167,34 @@ class OrderBridge < Sinatra::Base
   end
   
   post "/items-to-break" do
+    app_data = AppData.new
+    app_data.maintain params[:item], "items_to_break", 'A'
+    @data = app_data.get_items_weight_to_qty
+    app_data.close
     erb :items_to_break
   end
   
   post "/weight-to-case" do
+    app_data = AppData.new
+    app_data.maintain params[:item], "weight_to_cases", 'A'
+    @data = app_data.get_items_weight_to_qty
+    app_data.close
     erb :weight_to_cases
   end
   
   delete "/items-to-break" do
+    app_data = AppData.new
+    app_data.maintain params[:item], "items_to_break", 'D'
+    @data = app_data.get_items_weight_to_qty
+    app_data.close
     erb :items_to_break
   end
   
   delete "/weight-to-case" do
+    app_data = AppData.new
+    app_data.maintain params[:item], "weight_to_cases", 'D'
+    @data = app_data.get_items_weight_to_qty
+    app_data.close
     erb :weight_to_cases
   end
 

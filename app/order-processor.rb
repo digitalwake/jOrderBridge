@@ -212,7 +212,7 @@ class OrderProcessor
 		return new_str
 	end
 	
-	def set_s2k_item_and_weight
+	def set_s2k_item_and_weight(item_desc)
 		rs = []
 		item_found = false
 		donated_count = 0
@@ -239,7 +239,7 @@ class OrderProcessor
 								 :ship => @ship_to,
 								 :order => @purchase_order,
 								 :cust_item => @spec_num,
-                 :item_dsc => @item_dsc,
+                 :item_dsc => item_dsc,
 								 :qty  => @qty,
 								 :date => @delivery_date,
 								 :code => '0'
@@ -326,7 +326,7 @@ class OrderProcessor
 				@item_dsc = child['item_name']
 				
 				#Iterate while looking for Drop Shipments
-				@item = "0" unless self.set_s2k_item_and_weight
+				@item = "0" unless self.set_s2k_item_and_weight node.at_xpath("item_name").content
 				unit =  @data.item_to_break(@item)
 				#puts "uom = #{unit}"
 				if unit == 'EA'

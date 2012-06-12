@@ -9,16 +9,21 @@
   <% @data[0].each_key do |col| %>
     <td><%= col %></td>
     <% end %>
-    <td>&nbsp;</td>
+    <td>Action</td>
   </tr>
   <% @data.each do |hsh| %>
     <tr>
     <% hsh.each_value do |val| %>
       <td><%= val %></td>
-      <td><form action=<%= "'/weight-to-case/#{val}'" %> method="delete"><input type="submit" value="Delete" /></form></td>
       <% end %>
+      <td><form action="/weight-to-case" method="post">
+      <input type="hidden" name="item" value=<%= "'#{hsh["item"]}'" %> />
+      <input type="submit" name="_method" value="Delete" /></form></td>
     </tr>
   <% end %>
   </table>
+  <form action="/weight-to-case" method="post">
+  Item to add: <input type="text" name="item" /><br />
+  <input type="submit" value="Submit" /></form>
     
 </div>

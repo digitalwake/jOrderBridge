@@ -47,12 +47,12 @@ class AppData
 	end
 	
 	def get_items_to_break
-		hsh = @db_local.qry("select * from items_to_break")
+		hsh = @db_local.qry("select * from items_to_break group by item")
 		return hsh
 	end
 	
 	def get_items_weight_to_qty
-		hsh = @db_local.qry("select * from items_to_weight")
+		hsh = @db_local.qry("select * from weight_to_cases group by item")
 		return hsh
 	end
 	
@@ -63,8 +63,8 @@ class AppData
 	end
 	
 	def get_errors(params = {})
-	  puts "Error qry: select distinct cust_item, count(cust_item) as Occurrences from log where log_type = 'E' and order_date = #{params[:date]} group by cust_item"
-		ary = @db_local.qry("select distinct cust_item, count(cust_item) as Occurrences from log where log_type = 'E' and order_date = #{params[:date]} group by cust_item")
+	  puts "Error qry: select distinct cust_item, item_dsc, count(cust_item) as Occurrences from log where log_type = 'E' and order_date = #{params[:date]} group by cust_item"
+		ary = @db_local.qry("select distinct cust_item, item_dsc, count(cust_item) as Occurrences from log where log_type = 'E' and order_date = #{params[:date]} group by cust_item")
 		return ary
 	end
 	
