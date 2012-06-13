@@ -6,7 +6,7 @@
   </h2>
   <p>Please specify the order date you wish to view</p>
   
-  <form action="/log" method="post">
+  <form action="<%= log_url %>" method="post">
   Order date to view (MM/DD/YYYY): <input type="text" name="date" /><br />
   <input type="radio" name="log_type" value='E' checked/> Errors<br />
   <input type="radio" name="log_type" value='W' /> Warnings<br />

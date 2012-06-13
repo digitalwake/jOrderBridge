@@ -34,6 +34,14 @@ module Sinatra
       url '/preferences'
     end
     
+    def advanced_orders_url
+      url '/advanced'
+    end
+    
+    def current_orders_url
+      url '/current'
+    end
+    
   end
   
   helpers Helpers

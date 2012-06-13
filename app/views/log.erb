@@ -16,7 +16,7 @@
     <% hsh.each_value do |val| %>
       <td><%= val %></td>
       <% end %>
-      <td><a href= <%= "'/log/#{@log_type}/#{@date}/#{hsh["cust_item"]}'" %> class= "btn btn-large btn-primary">Details</a></td>
+      <td><a href= '<%= url "/log/#{@log_type}/#{@date}/#{hsh["cust_item"]}" %>' class= "btn btn-large btn-primary">Details</a></td>
     </tr>
   <% end %>
   </table>
