@@ -11,27 +11,27 @@ module Sinatra
     end
   
     def home_url
-      "/"
+      url '/'
     end
   
     def login_url
-      "/login"
+      url '/login'
     end
   
     def help_url
-      "/help"
+      url '/help'
     end
     
     def log_url
-      "/log"
+      url '/log'
     end
     
     def logs_url
-      "/logs"
+      url '/logs'
     end
     
     def preferences_url
-      "/preferences"
+      url '/preferences'
     end
     
   end
