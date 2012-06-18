@@ -8,7 +8,9 @@
   
   <form action=<%= url "/current" %> method="post">
   DOE User: <input type="text" name="user" /><br />
-  DOE Password: <input type="text" name="pass" /><br />
+  DOE Password: <input type="password" name="pass" /><br />
+  S2K User: <input type="text" name="sys_user" /><br />
+  S2K Password: <input type="password" name="sys_pass" /><br />
   Date to lock (MM/DD/YYYY): <input type="text" name="date" /><br />
   <input type="submit" value="Submit" />
     

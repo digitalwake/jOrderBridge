@@ -182,7 +182,7 @@ class OrderProcessor
 		@ns = doc.xpath("//elements")
 		
 		#Connect to S2K via JDBC and get a handle
-		@database_handle ||= DB.new :db => 'as400', :user => parms[:user], :pass => parms[:pass]
+		@database_handle ||= DB.new :db => 'as400', :user => parms[:s2k_user], :pass => parms[:s2k_pass]
 				
 		#Get item info
 		@item_master = @database_handle.qry("SELECT DISTINCT #{@@library_prefix}MODSDTA.VCOITEM.ONITEM, #{@@library_prefix}MODSDTA.VCOITEM.ONCITM,

@@ -10,19 +10,28 @@ java_import 'com.ibm.as400.access.AS400JDBCDriver'
 class DB
 	def initialize(parms = {})
 	  @@current_directory = Dir.getwd
-	  #puts "$$$$$$ CURRENT DIRECTORY = #{@@current_directory} $$$$$$$$$$"
 	  if parms[:db] == 'as400'
-	   	@connection ||= java.sql.DriverManager.get_connection "jdbc:as400://S2K/",parms[:user], parms[:pass]
+	    begin
+	   	  @connection ||= java.sql.DriverManager.get_connection "jdbc:as400://S2K/",parms[:user], parms[:pass]
+	   	rescue java.sql.SQLException
+	   	  puts "Error connection to iSeries. Error code: #{SQLException.getErrorCode()}
+	   	        SQL State: #{java.sql.SQLException.getSQLState()}."
+	   	end
+	   	  
   	  #rs = @connection.createStatement.executeQuery("SELECT EHCMP,EHTYPE,EHCUST,EHPONO,EHSHIP,EHDDT8 FROM t37files.vedxpohw")
   	  #return rs_to_hash(rs) #.inspect
 		 else
-		  @connection ||= java.sql.DriverManager.getConnection "jdbc:sqlite:#{@@current_directory}/data/orderbridge.sqlite3"
+		   begin
+		     @connection ||= java.sql.DriverManager.getConnection "jdbc:sqlite:#{@@current_directory}/data/orderbridge.sqlite3"
+		   rescue SQLException
+	   	   puts "Error connection to iSeries. Error code: #{SQLException.getErrorCode()}
+	   	        SQL State: #{SQLException.getSQLState()}."
+	   	 end
 		 end
 		 @stmt = @connection.createStatement
 	end
 
 	def qry(sql)
-		#@stmt.reset
 		temp = @stmt.executeQuery(sql)
 		rs = self.rs_to_hash(temp)
 		return rs

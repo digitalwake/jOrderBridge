@@ -33,6 +33,8 @@ class OrderBridge < Sinatra::Base
     puts "Connecting and downloading orders"
     app.prepare :doe_user => params[:user],
                     :doe_pass => params[:pass],
+                    :s2k_user => params[:sys_user],
+                    :s2k_pass => params[:sys_pass],
                     :advanced => 'Y',
                     :date => params[:from_date],
                     :end_date => params[:to_date]
@@ -61,6 +63,8 @@ class OrderBridge < Sinatra::Base
     puts "Connecting and downloading orders"
     app.prepare :doe_user => params[:user],
                     :doe_pass => params[:pass],
+                    :s2k_user => params[:sys_user],
+                    :s2k_pass => params[:sys_pass],
                     :advanced => 'N',
                     :lock => 'N',
                     :date => params[:date]
