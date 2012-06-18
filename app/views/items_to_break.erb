@@ -16,13 +16,13 @@
     <% hsh.each_value do |val| %>
       <td><%= val %></td>
       <% end %>
-      <td><form action="/items-to-break" method="post">
+      <td><form action= <%= url "/items-to-break" %> method="post">
       <input type="hidden" name="item" value=<%= "'#{hsh["item"]}'" %> />
       <input type="submit" name="_method" value="Delete" /></form></td>
     </tr>
   <% end %>
   </table>
-  <form action="/items-to-break" method="post">
+  <form action= <%= url "/items-to-break" %> method="post">
   Item to add: <input type="text" name="item" /><br />
   <input type="submit" value="Submit" /></form>
     
