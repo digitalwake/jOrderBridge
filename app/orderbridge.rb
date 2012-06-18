@@ -169,7 +169,8 @@ class OrderBridge < Sinatra::Base
     app_data.maintain params[:item], "items_to_break", 'A'
     @data = app_data.get_items_weight_to_qty
     app_data.close
-    erb :items_to_break
+    #erb :items_to_break
+    redirect to "/items-to-break"
   end
   
   post "/weight-to-case" do
@@ -177,7 +178,8 @@ class OrderBridge < Sinatra::Base
     app_data.maintain params[:item], "weight_to_cases", 'A'
     @data = app_data.get_items_weight_to_qty
     app_data.close
-    erb :weight_to_cases
+    #erb :weight_to_cases
+    redirect to "/weight-to-case"
   end
   
   delete "/items-to-break" do
@@ -185,7 +187,8 @@ class OrderBridge < Sinatra::Base
     app_data.maintain params[:item], "items_to_break", 'D'
     @data = app_data.get_items_weight_to_qty
     app_data.close
-    erb :items_to_break
+    #erb :items_to_break
+    redirect to "/items-to-break"
   end
   
   delete "/weight-to-case" do
@@ -193,7 +196,8 @@ class OrderBridge < Sinatra::Base
     app_data.maintain params[:item], "weight_to_cases", 'D'
     @data = app_data.get_items_weight_to_qty
     app_data.close
-    erb :weight_to_cases
+    #erb :weight_to_cases
+    redirect to "/weight-to-case"
   end
 
 end

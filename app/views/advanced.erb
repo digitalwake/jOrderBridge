@@ -5,7 +5,7 @@
     This is where you can download and process future orders beyond the locked date of the current orders.  
   </h2>
   <p>Please specify a date range by entering a "from" date and a "to" date below:</p>
-  <form action="/advanced" method="post">
+  <form action= <%= url "/advanced" %> method="post">
   DOE User: <input type="text" name="user" /><br />
   DOE Password: <input type="text" name="pass" /><br />
   From date (MM/DD/YYYY): <input type="text" name="from_date" /><br />

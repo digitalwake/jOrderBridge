@@ -6,7 +6,7 @@
   </h2>
   <p>Please specify the date you which to download and lock below:</p>
   
-  <form action="/current" method="post">
+  <form action=<%= url "/current" %> method="post">
   DOE User: <input type="text" name="user" /><br />
   DOE Password: <input type="text" name="pass" /><br />
   Date to lock (MM/DD/YYYY): <input type="text" name="date" /><br />
