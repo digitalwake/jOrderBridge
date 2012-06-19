@@ -15,6 +15,10 @@ class OrderProcessor
 	def initialize
 		@writer = OrderWriter.new
 		@data = AppData.new
+		File.open("config/config.txt", "r") do |fh|
+		  @system_user = fh.gets(":").chomp(":")
+		  @system_pass = fh.gets.chomp
+		end
 		#@log = LogWriter.new
 		@orders_processed = 0
 		@purchase_order = 0
@@ -182,7 +186,7 @@ class OrderProcessor
 		@ns = doc.xpath("//elements")
 		
 		#Connect to S2K via JDBC and get a handle
-		@database_handle ||= DB.new :db => 'as400', :user => parms[:s2k_user], :pass => parms[:s2k_pass]
+		@database_handle ||= DB.new :db => 'as400', :user => @system_user, :pass => @system_pass
 				
 		#Get item info
 		@item_master = @database_handle.qry("SELECT DISTINCT #{@@library_prefix}MODSDTA.VCOITEM.ONITEM, #{@@library_prefix}MODSDTA.VCOITEM.ONCITM,
