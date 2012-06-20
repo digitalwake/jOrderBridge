@@ -46,9 +46,9 @@ class OrderBridge < Sinatra::Base
     
     if success
       #change this to a redirect
-      redirect '/success' 
+      redirect to '/success' 
     else
-      redirect '/fail'
+      redirect to '/fail'
     end
   end
   
