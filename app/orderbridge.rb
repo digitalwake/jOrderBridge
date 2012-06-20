@@ -35,7 +35,8 @@ class OrderBridge < Sinatra::Base
                     :doe_pass => params[:pass],
                     :advanced => 'Y',
                     :date => params[:from_date],
-                    :end_date => params[:to_date]
+                    :end_date => params[:to_date],
+                    :boro => ""
                     
     puts "Processing orders and uploading to S2K"
     success = app.process
