@@ -97,7 +97,7 @@ class OrderBridge < Sinatra::Base
     app_data = AppData.new
     if params[:log_type] == 'E'
       @log_type = 'errors'
-      @data = app_data.get_errors :date => @date 
+      @data = app_data.get_errors :date => @date, :ord_type => params[:ord_type] 
       #@data = @app.get_data.get_errors :date => @date
       app_data.close
       unless @data.empty?
@@ -108,7 +108,7 @@ class OrderBridge < Sinatra::Base
       #redirect "/log/errors/#{date_url}"
     else
       @log_type = 'warnings'
-      @data = app_data.get_warnings :date => @date
+      @data = app_data.get_warnings :date => @date, :ord_type => params[:ord_type]
       #@data = @app.get_data.get_warnings :date => @date
       app_data.close
       unless @data.empty?
@@ -124,11 +124,15 @@ class OrderBridge < Sinatra::Base
     app_data = AppData.new
     if params[:log_type] == 'errors'
       @log_type = 'errors'
-      @data = app_data.get_error_orders_for_item :date => params[:date], :item => params[:item]
+      @data = app_data.get_error_orders_for_item :date => params[:date],
+                                                 :item => params[:item],
+                                                 :ord_type => params[:ord_type]
       #@data = @app.get_data.get_error_orders_for_item :date => params[:date], :item => params[:item]
     else
       @log_type = 'warnings'
-      @data = app_data.get_warning_orders_for_item :date => params[:date], :item => params[:item]
+      @data = app_data.get_warning_orders_for_item :date => params[:date],
+                                                 :item => params[:item],
+                                                 :ord_type => params[:ord_type]
       #@data = @app.get_data.get_warning_orders_for_item :date => params[:date], :item => params[:item]
     end
     app_data.close

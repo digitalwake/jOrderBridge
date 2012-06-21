@@ -237,8 +237,7 @@ class OrderProcessor
 		
 		#If we have no results log the error and exit with a failure
 		if rs.empty?
-		  unless @advanced == true
-			  @data.log  :type => 'E',
+			@data.log  :type => 'E',  #Error
 			           :cust => @cust_num,
 								 :ship => @ship_to,
 								 :order => @purchase_order,
@@ -246,39 +245,18 @@ class OrderProcessor
                  :item_dsc => @item_dsc,
 								 :qty  => @qty,
 								 :date => @delivery_date,
-								 :code => '0'
-			  end
+								 :item => @item,
+								 :msg => 'No item for Spec Number'
+								 
+			if @advanced == true
+			  @data.log :ord_type => 'F'  #Log as a Future Order
+			else
+			  @data.log :ord_type => 'O'  #Log as a Regular Order
+			end
 			return false
 		else
-			if donated_count > 1
-			  unless @advanced == true
-				  @data.log :type => 'W',
-				          :cust => @cust_num,
-								 	:ship => @ship_to,
-								 	:order => @purchase_order,
-								 	:date => @delivery_date,
-								 	:qty  => @qty,
-								 	:cust_item => @spec_num,
-                  :item_dsc => @item_dsc,
-								 	:code => 'D'
-				end
-			end
-			
-			if purchased_count > 1
-			  unless @advanced == true
-				  @data.log :type => 'W',
-				          :cust => @cust_num,
-								 	:ship => @ship_to,
-								 	:order => @purchase_order,
-								 	:date => @delivery_date,
-								 	:qty  => @qty,
-								 	:cust_item => @spec_num,
-                  :item_dsc => @item_dsc,
-								 	:code => 'P'
-			  end
-			end
-				 	
-			rs.each do |hsh|
+		  #Get the item from the set
+		  rs.each do |hsh|
 				break if item_found == true
 				@item = hsh[:item]
 				@item_weight = hsh[:weight]
@@ -286,8 +264,41 @@ class OrderProcessor
 					item_found = true
 				end
 			end
+			#Log Warnings
+			if donated_count > 1
+				@data.log :type => 'W',   #Warning
+				          :cust => @cust_num,
+								 	:ship => @ship_to,
+								 	:order => @purchase_order,
+								 	:date => @delivery_date,
+								 	:qty  => @qty,
+								 	:cust_item => @spec_num,
+                  :item_dsc => @item_dsc,
+                  :item => @item,
+								 	:msg => 'Too many Donated Matches'
+			end
+			
+			if purchased_count > 1
+				@data.log :type => 'W',
+				          :cust => @cust_num,
+								 	:ship => @ship_to,
+								 	:order => @purchase_order,
+								 	:date => @delivery_date,
+								 	:qty  => @qty,
+								 	:cust_item => @spec_num,
+                  :item_dsc => @item_dsc,
+                  :item => @item,
+								 	:msg => 'Too many Purchased Matches'
+			end
+				 	
+			
 		end
-		#puts "Item:#{@item} Weight:#{@item_weight}"
+		
+		if @advanced == true
+		  @data.log :ord_type => 'F'  #Log as a Future Order
+		else
+			@data.log :ord_type => 'O'  #Log as a Regular Order
+		end
 		return true
 	end
 	
