@@ -9,18 +9,25 @@
   <% @data[0].each_key do |col| %>
     <td><%= col %></td>
     <% end %>
-    <td>&nbsp;</td>
+    <td>&nbsp</td>
   </tr>
   <% @data.each do |hsh| %>
     <tr>
     <% hsh.each_value do |val| %>
       <td><%= val %></td>
       <% end %>
-      <td><a href= '<%= url "/log/#{@log_type}/#{@date}/#{hsh["cust_item"]}" %>' class= "btn btn-large btn-primary">Details</a></td>
+      <td><form action="<%= log_details_url %>" method="get">
+          <input type="hidden" name="log_type" value= '<%= @log_type %>' />
+          <input type="hidden" name="order_type" value= '<%= @order_type %>' />
+          <input type="hidden" name="order_date" value= <%= @date %> />
+          <input type="hidden" name="item" value= '<%= hsh['cust_item'] %>' />
+          <input type="submit" value="Details" class= "btn btn-small btn-primary"/>
+          </form>
+      </td>
     </tr>
   <% end %>
   </table>
   
-  <p><%= link_to logs_url, "<-Go Back" %></p>
+  <p><%= link_to logs_url, "<-New Search" %></p>
     
 </div>

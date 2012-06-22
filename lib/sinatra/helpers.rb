@@ -30,6 +30,10 @@ module Sinatra
       url '/logs'
     end
     
+    def log_details_url
+      url '/log-details'
+    end
+    
     def preferences_url
       url '/preferences'
     end

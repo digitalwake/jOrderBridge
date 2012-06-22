@@ -184,6 +184,10 @@ class OrderProcessor
 
 		#A NodeSet of the child elements - The DOE WebService names the elements "elements"
 		@ns = doc.xpath("//elements")
+		if @ns.empty?
+		  return false
+		end
+		#@error_message = doc.xpath("//error_message")
 		
 		#Connect to S2K via JDBC and get a handle
 		@database_handle ||= DB.new :db => 'as400', :user => @system_user, :pass => @system_pass
@@ -204,7 +208,7 @@ class OrderProcessor
 		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpohw")
 		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpodh")
 		
-				
+		return true				
 	end
 	
 	def get_date(str)
@@ -235,6 +239,12 @@ class OrderProcessor
 			end
 		end
 		
+		if @advanced == true
+			ord_type = 'F'  #Log as a Future Order
+	  else
+			ord_type = 'O'  #Log as a Regular Order
+		end
+		
 		#If we have no results log the error and exit with a failure
 		if rs.empty?
 			@data.log  :type => 'E',  #Error
@@ -246,13 +256,9 @@ class OrderProcessor
 								 :qty  => @qty,
 								 :date => @delivery_date,
 								 :item => @item,
+								 :ord_type => ord_type,
 								 :msg => 'No item for Spec Number'
-								 
-			if @advanced == true
-			  @data.log :ord_type => 'F'  #Log as a Future Order
-			else
-			  @data.log :ord_type => 'O'  #Log as a Regular Order
-			end
+			puts "Order Type was: #{ord_type}."
 			return false
 		else
 		  #Get the item from the set
@@ -275,6 +281,7 @@ class OrderProcessor
 								 	:cust_item => @spec_num,
                   :item_dsc => @item_dsc,
                   :item => @item,
+                  :ord_type => ord_type,
 								 	:msg => 'Too many Donated Matches'
 			end
 			
@@ -288,16 +295,11 @@ class OrderProcessor
 								 	:cust_item => @spec_num,
                   :item_dsc => @item_dsc,
                   :item => @item,
+                  :ord_type => ord_type,
 								 	:msg => 'Too many Purchased Matches'
 			end
 				 	
 			
-		end
-		
-		if @advanced == true
-		  @data.log :ord_type => 'F'  #Log as a Future Order
-		else
-			@data.log :ord_type => 'O'  #Log as a Regular Order
 		end
 		return true
 	end

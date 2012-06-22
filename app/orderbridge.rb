@@ -28,27 +28,37 @@ class OrderBridge < Sinatra::Base
   post "/advanced" do
     app = OrderProcessor.new
     success = false
+    fdate = params[:from_date][0..1].to_s + params[:from_date][3..4].to_s + params[:from_date][6..9].to_s
+    tdate = params[:to_date][0..1].to_s + params[:to_date][3..4].to_s + params[:to_date][6..9].to_s
     puts "The form has posted."
-    puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}"
-    puts "Connecting and downloading orders"
-    app.prepare :doe_user => params[:user],
+    puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}
+          fdate = #{fdate} and tdate = #{tdate}"
+    if params[:from_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and 
+       params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and
+       fdate.to_i < tdate.to_i
+       
+      puts "Connecting and downloading orders"
+      success = app.prepare :doe_user => params[:user],
                     :doe_pass => params[:pass],
                     :advanced => 'Y',
                     :date => params[:from_date],
                     :end_date => params[:to_date],
                     :boro => ""
                     
-    puts "Processing orders and uploading to S2K"
-    success = app.process
-    puts "Closing connections"
-    app.close
-    puts "Processing complete"
-    
-    if success
-      #change this to a redirect
-      redirect to '/success' 
+      if success == true
+        puts "Processing Advanced orders and uploading to S2K"
+        success = app.process
+        puts "Closing connections"
+        app.close
+        puts "Processing complete"
+      end
+      if success
+        redirect to '/success' 
+      else
+        redirect to '/fail'
+      end
     else
-      redirect to '/fail'
+      erb :invalid_date
     end
   end
   
@@ -60,23 +70,29 @@ class OrderBridge < Sinatra::Base
     app = OrderProcessor.new
     success = false
     puts "Connecting and downloading orders"
-    app.prepare :doe_user => params[:user],
+    #Check for proper date format (mm/dd/yyyy)
+    if params[:date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/
+      success = app.prepare :doe_user => params[:user],
                     :doe_pass => params[:pass],
                     :advanced => 'N',
                     :lock => params[:lock],
                     :date => params[:date]
                     
-    puts "Processing orders and uploading to S2K"
-    success = app.process
-    puts "Closing connections"
-    app.close
-    puts "Processing complete"
+      if success == true
+        puts "Processing Current orders and uploading to S2K"
+        success = app.process
+        puts "Closing connections"
+        app.close
+        puts "Processing complete"
+      end
+      if success
+        redirect to '/success' 
+      else
+        redirect to '/fail'
+      end
     
-    if success
-      #change this to a redirect
-      redirect to '/success' 
     else
-      redirect to '/fail'
+      erb :invalid_date
     end
   end
   
@@ -93,11 +109,12 @@ class OrderBridge < Sinatra::Base
   end
   
   post "/log" do
-    @date = "#{params[:date].slice!(6..9)}#{params[:date].slice!(0..1)}#{params[:date].slice!(1..2)}"
+    @date = params[:date][6..9].to_s + params[:date][0..1].to_s + params[:date][3..4].to_s
+    @order_type = params[:ord_type]
     app_data = AppData.new
     if params[:log_type] == 'E'
       @log_type = 'errors'
-      @data = app_data.get_errors :date => @date, :ord_type => params[:ord_type] 
+      @data = app_data.get_errors :date => @date, :ord_type => @order_type 
       #@data = @app.get_data.get_errors :date => @date
       app_data.close
       unless @data.empty?
@@ -120,19 +137,21 @@ class OrderBridge < Sinatra::Base
     end
   end
   
-  get "/log/:log_type/:date/:item" do
+  #post "/log/:log_type/:order_type/:date/:item" do
+  get "/log-details?" do
     app_data = AppData.new
-    if params[:log_type] == 'errors'
+    puts "Item paramter = #{params[:item].gsub(/\+/," ")}"
+    if params[:log_type] == 'E'
       @log_type = 'errors'
-      @data = app_data.get_error_orders_for_item :date => params[:date],
-                                                 :item => params[:item],
-                                                 :ord_type => params[:ord_type]
+      @data = app_data.get_error_orders_for_item :date => params[:order_date],
+                                                 :item => params[:item].gsub(/\+/," "),
+                                                 :ord_type => params[:order_type]
       #@data = @app.get_data.get_error_orders_for_item :date => params[:date], :item => params[:item]
     else
       @log_type = 'warnings'
-      @data = app_data.get_warning_orders_for_item :date => params[:date],
-                                                 :item => params[:item],
-                                                 :ord_type => params[:ord_type]
+      @data = app_data.get_warning_orders_for_item :date => params[:order_date],
+                                                 :item => params[:item].gsub(/\+/," "),
+                                                 :ord_type => params[:order_type]
       #@data = @app.get_data.get_warning_orders_for_item :date => params[:date], :item => params[:item]
     end
     app_data.close
