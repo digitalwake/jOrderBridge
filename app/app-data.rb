@@ -41,10 +41,10 @@ class AppData
 			end
 	end
 	
-	def maintain(input,tbl,flag)
+	def maintain(tbl,flag,options={})
 		case flag
-			when "A" then add_to_pref_table(input,tbl)
-			when "D" then delete_from_pref_table(input,tbl)
+			when "A" then add_to_pref_table(tbl,options)
+			when "D" then delete_from_pref_table(tbl,options)
 		end
 		@itb = self.get_items_to_break
 		@wtc = self.get_items_weight_to_qty
@@ -135,16 +135,20 @@ class AppData
 	end
 	
 	protected
-	def delete_from_pref_table(input,tbl)
-		@db_local.update_qry("delete from #{tbl} where item = #{input.to_s}")
+	def delete_from_pref_table(tbl,options={})
+		@db_local.update_qry("delete from #{tbl} where item = #{options[:item]}")
 	end
 	
-	def add_to_pref_table(input,tbl)
-		@db_local.update_qry("insert into #{tbl} (item) values(#{input.to_s})")
+	def add_to_pref_table(tbl,options={})
+	  puts "insert into #{tbl} (item,desc) values(#{options[:item]},'#{options[:desc]}')"
+	  if @db_local.qry("select item from #{tbl} where item = #{options[:item]}").empty?
+		  @db_local.update_qry("insert into #{tbl} (item,desc) values(#{options[:item]},'#{options[:desc]}')")
+		else
+		  puts "Item #{options[:item]} already exists in the database."
+		end		  
 	end
 	
 	def add_to_log_table(input)
-	  #puts "The SQL is: insert into log (log_type, log_code, order_date, customer, ship_to, cust_item, item_dsc, created) values(#{input})"
 		@db_local.update_qry("insert into log (log_type, order_date, order_num, customer, ship_to, cust_item, item_dsc, qty, item, log_msg, ord_type, created_at) values(#{input})")
 	end
 	

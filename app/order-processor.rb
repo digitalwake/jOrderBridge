@@ -151,7 +151,7 @@ class OrderProcessor
 	def close
 		@database_handle.close
 		@data.close
-		puts "#{@writer.orders} Orders Processed with a total of #{@writer.total_order_lines} order lines."
+		"#{@writer.orders} Orders Processed with a total of #{@writer.total_order_lines} order lines."
     #@log.close
 	end
 	
@@ -201,7 +201,7 @@ class OrderProcessor
 																						(#{@@library_prefix}FILES.VINITEM.ICITEM = #{@@library_prefix}MODSDTA.VCOITEM.ONITEM)) INNER JOIN #{@@library_prefix}FILES.FINITEM ON 
 																						#{@@library_prefix}MODSDTA.VCOITEM.ONITEM = #{@@library_prefix}FILES.FINITEM.FICITEM INNER JOIN #{@@library_prefix}FILES.VINITMB ON 
 																						#{@@library_prefix}FILES.VINITMB.IFITEM=#{@@library_prefix}FILES.FINITEM.FICITEM WHERE 
-																						(((#{@@library_prefix}MODSDTA.VCOITEM.ONCUST)='100000 ')) AND ICDEL <> 'I'")#.fetch(:all,:Struct)
+																						(((#{@@library_prefix}MODSDTA.VCOITEM.ONCUST)='100000 ')) AND ICDEL <> 'I' order by #{@@library_prefix}MODSDTA.VCOITEM.ONITEM")#.fetch(:all,:Struct)
 		#@item_master = @database_handle.rs_to_hash(rs)													
 																						
 		#Clear EDI tables

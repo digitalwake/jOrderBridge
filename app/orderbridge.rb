@@ -2,10 +2,12 @@ require 'app/order-processor.rb'
 require 'lib/sinatra/helpers.rb'
 require 'app/app-data.rb'
 require 'sinatra/base'
+require 'sinatra/flash'
 
 class OrderBridge < Sinatra::Base
 
   helpers Sinatra::Helpers
+  register Sinatra::Flash
   use Rack::MethodOverride
 
   #app = OrderProcessor.new
@@ -30,7 +32,7 @@ class OrderBridge < Sinatra::Base
     success = false
     fdate = params[:from_date][0..1].to_s + params[:from_date][3..4].to_s + params[:from_date][6..9].to_s
     tdate = params[:to_date][0..1].to_s + params[:to_date][3..4].to_s + params[:to_date][6..9].to_s
-    puts "The form has posted."
+    #puts "The form has posted."
     puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}
           fdate = #{fdate} and tdate = #{tdate}"
     if params[:from_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and 
@@ -49,7 +51,7 @@ class OrderBridge < Sinatra::Base
         puts "Processing Advanced orders and uploading to S2K"
         success = app.process
         puts "Closing connections"
-        app.close
+        flash[:notice] = app.close
         puts "Processing complete"
       end
       if success
@@ -82,7 +84,7 @@ class OrderBridge < Sinatra::Base
         puts "Processing Current orders and uploading to S2K"
         success = app.process
         puts "Closing connections"
-        app.close
+        flash[:notice] = app.close
         puts "Processing complete"
       end
       if success
@@ -190,7 +192,8 @@ class OrderBridge < Sinatra::Base
   
   post "/items-to-break" do
     app_data = AppData.new
-    app_data.maintain params[:item], "items_to_break", 'A'
+    puts "Item to break = #{params[:item]} and Description = #{params[:desc]}"
+    app_data.maintain "items_to_break", 'A', :item => params[:item], :desc => params[:desc]
     @data = app_data.get_items_weight_to_qty
     app_data.close
     #erb :items_to_break
@@ -199,7 +202,7 @@ class OrderBridge < Sinatra::Base
   
   post "/weight-to-case" do
     app_data = AppData.new
-    app_data.maintain params[:item], "weight_to_cases", 'A'
+     app_data.maintain "weight_to_cases", 'A', :item => params[:item], :desc => params[:desc]
     @data = app_data.get_items_weight_to_qty
     app_data.close
     #erb :weight_to_cases
@@ -208,7 +211,8 @@ class OrderBridge < Sinatra::Base
   
   delete "/items-to-break" do
     app_data = AppData.new
-    app_data.maintain params[:item], "items_to_break", 'D'
+    puts "Item to break = #{params[:item]} and Description = #{params[:desc]}"
+    app_data.maintain "items_to_break", 'D', :item => params[:item], :desc => params[:desc]
     @data = app_data.get_items_weight_to_qty
     app_data.close
     #erb :items_to_break
@@ -217,7 +221,7 @@ class OrderBridge < Sinatra::Base
   
   delete "/weight-to-case" do
     app_data = AppData.new
-    app_data.maintain params[:item], "weight_to_cases", 'D'
+    app_data.maintain "weight_to_cases", 'D', :item => params[:item], :desc => params[:desc]
     @data = app_data.get_items_weight_to_qty
     app_data.close
     #erb :weight_to_cases

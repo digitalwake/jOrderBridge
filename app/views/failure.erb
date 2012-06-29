@@ -4,6 +4,11 @@
   <h2>
     Processing of Orders has failed
   </h2>
+  <% if flash[:notice] %>
+    <h3>
+    <%= flash[:notice] %>
+    </h3>
+  <% end %>
   <p>Please contact your System Administrator to resolve the issue.</p>
     
 </div>

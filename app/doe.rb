@@ -3,8 +3,8 @@ require 'savon'
 
 class DoeOrders
 
-@@current_log_file = "tmp/current_orders_#{Time.now.strftime("%Y%m%d.xml")}"
-@@advanced_log_file = "tmp/advanced_orders_#{Time.now.strftime("%Y%m%d.xml")}"
+@@current_log_file = "tmp/current_orders"
+@@advanced_log_file = "tmp/advanced_orders"
 @@wsdl_info = "./tmp/info.txt"
 
 	def initialize
@@ -15,16 +15,16 @@ class DoeOrders
 		@end_date = ""
 		@locked_flag = false
 		@boro = ""
-		@cfh = File.open(@@current_log_file, "w")
-		@afh = File.open(@@advanced_log_file, "w")
+		#@cfh = File.open(@@current_log_file, "w")
+		#@afh = File.open(@@advanced_log_file, "w")
 	end
 
 	def get_order_filename
-		return @@current_log_file
+		@@current_log_file + "_#{Time.now.strftime("%Y%m%d.xml")}"
 	end
 
 	def get_advanced_order_filename
-		return @@advanced_log_file
+		@@advanced_log_file + "_#{Time.now.strftime("%Y%m%d.xml")}"
 	end
 
 	attr_accessor :vendor_id, :pass, :date, :end_date, :locked_flag, :boro
@@ -71,9 +71,12 @@ class DoeOrders
 			}
 			soap.env_namespace = 'soap12'
 		end
-
-		@cfh.puts response.to_xml
-		@cfh.close
+		
+		f = File.open(get_order_filename, "w")
+		f.puts response.to_xml
+		f.close
+		#@cfh.puts response.to_xml
+		#@cfh.close
 		return response.to_xml
 	end
 	
@@ -116,8 +119,11 @@ class DoeOrders
 			soap.env_namespace = 'soap12'
 		end
 		
-		@afh.puts response.to_xml
-		@afh.close
+		f = File.open(get_advanced_order_filename, "w")
+		f.puts response.to_xml
+		f.close
+		#@afh.puts response.to_xml
+		#@afh.close
 		return response.to_xml
 	end
 end

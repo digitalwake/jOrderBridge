@@ -7,7 +7,7 @@ gem 'sinatra'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
 gem 'savon'
-#gem 'rdbi-driver-odbc'
+gem 'sinatra-flash'
 gem 'nokogiri'
 #gem 'open-uri'
 gem 'jruby-openssl'

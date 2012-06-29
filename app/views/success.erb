@@ -4,6 +4,11 @@
   <h2>
     Processing of Orders has completed succesfully 
   </h2>
+     <% if flash[:notice] %>
+      <h3>
+      <%= flash[:notice] %>
+      </h3>
+     <% end %>
   <p>Please click the button below to review any errors or warnings for the current session.</p>
   <a href= <%= url "/logs" %> class= "btn btn-large btn-primary">Review Log!</a>
     
