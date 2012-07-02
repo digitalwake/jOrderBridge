@@ -5,7 +5,7 @@ require 'bigdecimal'
 
 java_import 'com.ibm.as400.access.AS400JDBCDriver'
 
-@@library_prefix="T37"
+@@library_prefix="R37"
 
 class DB
 	def initialize(parms = {})

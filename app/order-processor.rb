@@ -10,7 +10,7 @@ require 'app/log-writer.rb'
 
 class OrderProcessor
 
-@@library_prefix="T37"
+@@library_prefix="R37"
 
 	def initialize
 		@writer = OrderWriter.new
