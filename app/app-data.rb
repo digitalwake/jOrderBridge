@@ -17,7 +17,8 @@ class AppData
 
 		@db_local.update_qry("create table if not exists items_to_break (item text, desc text)")
 		@db_local.update_qry("create table if not exists items_to_weight (item text, desc text)")
-		@db_local.update_qry("create table if not exists log (log_id INTEGER PRIMARY KEY AUTOINCREMENT, log_type char, log_msg text, ord_type char, order_date date, customer text, ship_to text, order_num bigint, item text, item_dsc text, cust_item text, qty integer, created_at date)")
+		@db_local.update_qry("create table if not exists program_runs (run_id INTEGER PRIMARY KEY AUTOINCREMENT, created_at date)")
+		@db_local.update_qry("create table if not exists log (log_id INTEGER PRIMARY KEY AUTOINCREMENT, run_id integer, log_type char, log_msg text, ord_type char, order_date date, customer text, ship_to text, order_num bigint, item text, item_dsc text, cust_item text, qty integer, created_at date)")
 		@itb = self.get_items_to_break
 		@wtc = self.get_items_weight_to_qty
 	end
@@ -51,6 +52,22 @@ class AppData
 		
 	end
 	
+	def new_run_id
+	  #Get the last run id
+	  new_run = @db_local.qry("select run_id from program_runs order by run_id desc limit 1")
+	  if new_run.empty?
+	    @db_local.update_qry("insert into program_runs (created_at) values('#{Time.now}')")
+	    return 1
+	  end
+	  @db_local.update_qry("insert into program_runs (created_at) values('#{Time.now}')")
+	  return (new_run[0]['run_id']) + 1
+	end
+	
+	def run_id?
+	  id=@db_local.qry("select run_id from program_runs order by run_id desc limit 1")
+	  return id[0]['run_id']
+	end
+	
 	def get_items_to_break
 		hsh = @db_local.qry("select * from items_to_break group by item")
 		return hsh
@@ -62,26 +79,26 @@ class AppData
 	end
 	
 	def get_warnings(params = {})
-	  #puts "Warning qry: select distinct cust_item, count(cust_item) as Occurrences, log_msg as Warning from log where log_type = 'W' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' group by cust_item"
-		ary = @db_local.qry("select distinct cust_item, count(cust_item) as Occurrences, log_msg as Warning from log where log_type = 'W' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' group by cust_item")
+	  puts "WARNINGS: select distinct cust_item, count(cust_item) as Occurrences, log_msg as Warning from log where log_type = 'W' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item"
+		ary = @db_local.qry("select distinct cust_item, count(cust_item) as Occurrences, log_msg as Warning from log where log_type = 'W' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item")
 		return ary
 	end
 	
 	def get_errors(params = {})
-	  #puts "Error qry: select distinct cust_item, item_dsc, count(cust_item) as Occurrences, log_msg as Error from log where log_type = 'E' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' group by cust_item"
-		ary = @db_local.qry("select distinct cust_item, item_dsc, count(cust_item) as Occurrences, log_msg as Error from log where log_type = 'E' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' group by cust_item")
+	  puts "ERRORS: select distinct cust_item, item_dsc, count(cust_item) as Occurrences, log_msg as Error from log where log_type = 'E' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item"
+		ary = @db_local.qry("select distinct cust_item, item_dsc, count(cust_item) as Occurrences, log_msg as Error from log where log_type = 'E' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item")
 		return ary
 	end
 	
 	def get_warning_orders_for_item(params = {})
 	  #puts "select order_date, order_num, customer, ship_to, cust_item, item_dsc, item_code as ItemUsed, qty from log where log_type = 'W' and order_date = #{params[:date]} and cust_item = '#{params[:item].to_s}' and ord_type = #{params[:ord_type]} order by order_num"
-		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, item as ItemUsed, qty from log where log_type = 'W' and order_date = #{params[:date]} and cust_item = '#{params[:item].to_s}' and ord_type = '#{params[:ord_type]}' order by order_num")
+		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, item as ItemUsed, qty from log where log_type = 'W' and order_date = #{params[:date]} and cust_item = '#{params[:item].to_s}' and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} order by order_num")
 		return ary
 	end
 	
 	def get_error_orders_for_item(params = {})
 	 #puts "select order_date, order_num, customer, ship_to, cust_item, item_dsc, qty from log where log_type = 'E' and order_date = #{params[:date]} and cust_item = '#{params[:item]}' and ord_type = #{params[:ord_type]} order by order_num"
-		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, qty from log where log_type = 'E' and order_date = #{params[:date]} and cust_item = '#{params[:item]}' and ord_type = '#{params[:ord_type]}' order by order_num")
+		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, qty from log where log_type = 'E' and order_date = #{params[:date]} and cust_item = '#{params[:item]}' and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} order by order_num")
 		return ary
 	end
 	
@@ -125,7 +142,7 @@ class AppData
 	end
 	
 	def log(parms = {})
-	  values= "'#{parms[:type]}', #{parms[:date]}, '#{parms[:order]}', '#{parms[:cust]}', '#{parms[:ship]}', '#{parms[:cust_item].strip}', '#{parms[:item_dsc]}', #{parms[:qty]}, '#{parms[:item]}', '#{parms[:msg]}', '#{parms[:ord_type]}', '#{Time.now.strftime("%Y-%m-%d %H:%M:%S")}'"
+	  values= "'#{parms[:type]}', #{parms[:run_id]}, #{parms[:date]}, '#{parms[:order]}', '#{parms[:cust]}', '#{parms[:ship]}', '#{parms[:cust_item].strip}', '#{parms[:item_dsc]}', #{parms[:qty]}, '#{parms[:item]}', '#{parms[:msg]}', '#{parms[:ord_type]}', '#{Time.now.strftime("%Y-%m-%d %H:%M:%S")}'"
 		
 		self.add_to_log_table(values)
 	end
@@ -149,7 +166,11 @@ class AppData
 	end
 	
 	def add_to_log_table(input)
-		@db_local.update_qry("insert into log (log_type, order_date, order_num, customer, ship_to, cust_item, item_dsc, qty, item, log_msg, ord_type, created_at) values(#{input})")
+		@db_local.update_qry("insert into log (log_type, run_id, order_date, order_num, customer, ship_to, cust_item, item_dsc, qty, item, log_msg, ord_type, created_at) values(#{input})")
 	end
+	
+	#def clear_log
+	#  @db_local.update_qry("UPDATE table log_history set log_id = , log_type=, log_msg=, ord_type=, order_date=, customer=, ship_to=, order_num=, item=, item_dsc=, cust_item=, qty=, created_at="
+	#end
 	
 end

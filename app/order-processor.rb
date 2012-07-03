@@ -157,11 +157,17 @@ class OrderProcessor
 	
 	#protected
 	def prepare(parms = {})
+	
+	  @run_id = @data.new_run_id
+	  puts "Order Processor Run id is: #{@run_id}"
 			
 		doe_service = DoeOrders.new
 		doe_service.pass = parms[:doe_pass]
 		doe_service.vendor_id = parms[:doe_user]
 		doe_service.date = parms[:date]
+		
+		#Archive and clear the previous log.
+		#@data.clear_log
 		
 		if parms[:advanced]=='N'
 		  @advanced = false
@@ -248,6 +254,7 @@ class OrderProcessor
 		#If we have no results log the error and exit with a failure
 		if rs.empty?
 			@data.log  :type => 'E',  #Error
+			           :run_id => @run_id,
 			           :cust => @cust_num,
 								 :ship => @ship_to,
 								 :order => @purchase_order,
@@ -273,6 +280,7 @@ class OrderProcessor
 			#Log Warnings
 			if donated_count > 1
 				@data.log :type => 'W',   #Warning
+				          :run_id => @run_id,
 				          :cust => @cust_num,
 								 	:ship => @ship_to,
 								 	:order => @purchase_order,
@@ -287,6 +295,7 @@ class OrderProcessor
 			
 			if purchased_count > 1
 				@data.log :type => 'W',
+				          :run_id => @run_id,
 				          :cust => @cust_num,
 								 	:ship => @ship_to,
 								 	:order => @purchase_order,

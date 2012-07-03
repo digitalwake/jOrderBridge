@@ -114,9 +114,11 @@ class OrderBridge < Sinatra::Base
     @date = params[:date][6..9].to_s + params[:date][0..1].to_s + params[:date][3..4].to_s
     @order_type = params[:ord_type]
     app_data = AppData.new
+    id = app_data.run_id?
+    puts "The Current Run_id is: #{id}"
     if params[:log_type] == 'E'
       @log_type = 'errors'
-      @data = app_data.get_errors :date => @date, :ord_type => @order_type 
+      @data = app_data.get_errors :date => @date, :ord_type => @order_type, :run_id => id 
       #@data = @app.get_data.get_errors :date => @date
       app_data.close
       unless @data.empty?
@@ -127,7 +129,7 @@ class OrderBridge < Sinatra::Base
       #redirect "/log/errors/#{date_url}"
     else
       @log_type = 'warnings'
-      @data = app_data.get_warnings :date => @date, :ord_type => params[:ord_type]
+      @data = app_data.get_warnings :date => @date, :ord_type => params[:ord_type], :run_id => id
       #@data = @app.get_data.get_warnings :date => @date
       app_data.close
       unless @data.empty?
@@ -143,15 +145,19 @@ class OrderBridge < Sinatra::Base
   get "/log-details?" do
     app_data = AppData.new
     puts "Item paramter = #{params[:item].gsub(/\+/," ")}"
-    if params[:log_type] == 'E'
+    id = app_data.run_id?
+    puts "The Current Run_id is: #{id}"
+    if params[:log_type] == 'errors'
       @log_type = 'errors'
       @data = app_data.get_error_orders_for_item :date => params[:order_date],
+                                                 :run_id => id,
                                                  :item => params[:item].gsub(/\+/," "),
                                                  :ord_type => params[:order_type]
       #@data = @app.get_data.get_error_orders_for_item :date => params[:date], :item => params[:item]
     else
       @log_type = 'warnings'
       @data = app_data.get_warning_orders_for_item :date => params[:order_date],
+                                                 :run_id => id,
                                                  :item => params[:item].gsub(/\+/," "),
                                                  :ord_type => params[:order_type]
       #@data = @app.get_data.get_warning_orders_for_item :date => params[:date], :item => params[:item]
@@ -172,22 +178,24 @@ class OrderBridge < Sinatra::Base
     app_data = AppData.new
     @data = app_data.get_items_to_break
     app_data.close
-    unless @data.empty?
-      erb :items_to_break
-    else
-      erb :log_empty
-    end
+    #unless @data.empty?
+    #  erb :items_to_break
+    #else
+    #  erb :log_empty
+    #end
+   erb :items_to_break
   end
   
   get "/weight-to-case" do
     app_data = AppData.new
     @data = app_data.get_items_weight_to_qty
     app_data.close
-    unless @data.empty?
-      erb :weight_to_cases
-    else
-      erb :log_empty
-    end
+    #unless @data.empty?
+    #  erb :weight_to_cases
+    #else
+    # erb :log_empty
+    #end
+    erb :weight_to_cases
   end
   
   post "/items-to-break" do
