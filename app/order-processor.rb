@@ -262,19 +262,30 @@ class OrderProcessor
                  :item_dsc => @item_dsc,
 								 :qty  => @qty,
 								 :date => @delivery_date,
-								 :item => @item,
+								 :item => 0,
 								 :ord_type => ord_type,
 								 :msg => 'No item for Spec Number'
 			puts "Order Type was: #{ord_type}."
 			return false
 		else
 		  #Get the item from the set
+		  @item = 0
 		  rs.each do |hsh|
 				break if item_found == true
-				@item = hsh[:item]
-				@item_weight = hsh[:weight]
+				  candidate = hsh[:item]
+				  if @item == 0
+				    @item = hsh[:item]
+				    @item_weight = hsh[:weight]
+				  end
 				if hsh[:donated] == 'Y'
+				  @item = hsh[:item]
+				  @item_weight = hsh[:weight]
 					item_found = true
+				else
+				  if candidate.to_i < @item.to_i
+				    @item = hsh[:item]
+				    @item_weight = hsh[:weight]
+				  end
 				end
 			end
 			#Log Warnings
