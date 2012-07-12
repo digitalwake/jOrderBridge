@@ -377,10 +377,10 @@ class OrderProcessor
 					drop_ship_orderline += 1
 					@drop_ship = true
 					@writer.write_order_detail_drop_ship(@database_handle, @cust_num, @purchase_order,
-																								drop_ship_orderline, @item, @spec_num, unit, @ship_to, @qty)
+																								drop_ship_orderline, @item, @spec_num, unit, @ship_to, @qty) unless @item == 0
 				else
 					orderline += 1
-					@writer.write_order_detail(@database_handle, @cust_num, @purchase_order, orderline, @item, @spec_num, unit, @ship_to, @qty)
+					@writer.write_order_detail(@database_handle, @cust_num, @purchase_order, orderline, @item, @spec_num, unit, @ship_to, @qty) unless @item == 0
 				end
 			end #of details block
 			
