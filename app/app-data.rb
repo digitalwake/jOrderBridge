@@ -79,26 +79,26 @@ class AppData
 	end
 	
 	def get_warnings(params = {})
-	  puts "WARNINGS: select distinct cust_item, count(cust_item) as Occurrences, log_msg as Warning from log where log_type = 'W' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item"
-		ary = @db_local.qry("select distinct cust_item, count(cust_item) as Occurrences, log_msg as Warning from log where log_type = 'W' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item")
+	  puts "WARNINGS: select distinct cust_item, order_date as Date, log_msg as Warning from log where log_type = 'W' and (order_date >= #{params[:from_date]} and order_date <= #{params[:to_date]}) and ord_type = '#{params[:ord_type]}' group by cust_item"
+		ary = @db_local.qry("select distinct cust_item, order_date as Date, log_msg as Warning from log where log_type = 'W' and (order_date >= #{params[:from_date]} and order_date <= #{params[:to_date]}) and ord_type = '#{params[:ord_type]}' group by cust_item")
 		return ary
 	end
 	
 	def get_errors(params = {})
-	  puts "ERRORS: select distinct cust_item, item_dsc, count(cust_item) as Occurrences, log_msg as Error from log where log_type = 'E' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item"
-		ary = @db_local.qry("select distinct cust_item, item_dsc, count(cust_item) as Occurrences, log_msg as Error from log where log_type = 'E' and order_date = #{params[:date]} and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} group by cust_item")
+	  puts "ERRORS: select distinct cust_item, item_dsc, count(cust_item) as Occurrences, order_date as Date, log_msg as Error from log where log_type = 'E' and (order_date >= #{params[:from_date]} and order_date <= #{params[:to_date]}) and ord_type = '#{params[:ord_type]}' group by cust_item"
+		ary = @db_local.qry("select distinct cust_item, item_dsc, count(cust_item) as Occurrences, order_date as Date, log_msg as Error from log where log_type = 'E' and (order_date >= #{params[:from_date]} and order_date <= #{params[:to_date]}) and ord_type = '#{params[:ord_type]}' group by cust_item")
 		return ary
 	end
 	
 	def get_warning_orders_for_item(params = {})
 	  #puts "select order_date, order_num, customer, ship_to, cust_item, item_dsc, item_code as ItemUsed, qty from log where log_type = 'W' and order_date = #{params[:date]} and cust_item = '#{params[:item].to_s}' and ord_type = #{params[:ord_type]} order by order_num"
-		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, item as ItemUsed, qty from log where log_type = 'W' and order_date = #{params[:date]} and cust_item = '#{params[:item].to_s}' and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} order by order_num")
+		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, item as ItemUsed, qty from log where log_type = 'W' and order_date = #{params[:date]} and cust_item = '#{params[:item].to_s}' and ord_type = '#{params[:ord_type]}' order by order_num")
 		return ary
 	end
 	
 	def get_error_orders_for_item(params = {})
 	 #puts "select order_date, order_num, customer, ship_to, cust_item, item_dsc, qty from log where log_type = 'E' and order_date = #{params[:date]} and cust_item = '#{params[:item]}' and ord_type = #{params[:ord_type]} order by order_num"
-		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, qty from log where log_type = 'E' and order_date = #{params[:date]} and cust_item = '#{params[:item]}' and ord_type = '#{params[:ord_type]}' and run_id = #{params[:run_id]} order by order_num")
+		ary = @db_local.qry("select order_date, order_num, customer, ship_to, cust_item, item_dsc, qty from log where log_type = 'E' and order_date = #{params[:date]} and cust_item = '#{params[:item]}' and ord_type = '#{params[:ord_type]}' order by order_num")
 		return ary
 	end
 	

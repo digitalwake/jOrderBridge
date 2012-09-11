@@ -7,7 +7,8 @@
   <p>Please specify the order date you wish to view</p>
   
   <form action="<%= log_url %>" method="post">
-  Order date to view (MM/DD/YYYY): <input type="text" name="date" /><br />
+  From Order Date (MM/DD/YYYY): <input type="text" name="from_date" /><br />
+  To Order Date (MM/DD/YYYY): <input type="text" name="to_date" /><br />
   <input type="radio" name="log_type" value='E' checked/> Errors<br />
   <input type="radio" name="log_type" value='W' /> Warnings<br /><br />
   <input type="radio" name="ord_type" value='O' checked/> Current Orders<br />

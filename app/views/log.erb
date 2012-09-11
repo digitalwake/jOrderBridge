@@ -19,7 +19,7 @@
       <td><form action="<%= log_details_url %>" method="get">
           <input type="hidden" name="log_type" value= '<%= @log_type %>' />
           <input type="hidden" name="order_type" value= '<%= @order_type %>' />
-          <input type="hidden" name="order_date" value= <%= @date %> />
+          <input type="hidden" name="order_date" value= <%= hsh['Date'] %> />
           <input type="hidden" name="item" value= '<%= hsh['cust_item'] %>' />
           <input type="submit" value="Details" class= "btn btn-small btn-primary"/>
           </form>

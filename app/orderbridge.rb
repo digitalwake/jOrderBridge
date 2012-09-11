@@ -111,33 +111,48 @@ class OrderBridge < Sinatra::Base
   end
   
   post "/log" do
-    @date = params[:date][6..9].to_s + params[:date][0..1].to_s + params[:date][3..4].to_s
-    @order_type = params[:ord_type]
-    app_data = AppData.new
-    id = app_data.run_id?
-    puts "The Current Run_id is: #{id}"
-    if params[:log_type] == 'E'
-      @log_type = 'errors'
-      @data = app_data.get_errors :date => @date, :ord_type => @order_type, :run_id => id 
-      #@data = @app.get_data.get_errors :date => @date
-      app_data.close
-      unless @data.empty?
-        erb :log
+    if params[:from_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and
+        params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/
+      @from_date = params[:from_date][6..9].to_s + params[:from_date][0..1].to_s + params[:from_date][3..4].to_s
+      @to_date = params[:to_date][6..9].to_s + params[:to_date][0..1].to_s + params[:to_date][3..4].to_s
+      @order_type = params[:ord_type]
+      app_data = AppData.new
+      id = app_data.run_id?
+      puts "The Current Run_id is: #{id}"
+      puts ""
+      puts "From Date is: #{@from_date}"
+      puts "To Date is: #{@to_date}"
+      puts ""
+      if params[:log_type] == 'E'
+        @log_type = 'errors'
+        @data = app_data.get_errors :from_date => @from_date,
+                                  :to_date => @to_date,
+                                  :ord_type => @order_type, :run_id => id 
+        #@data = @app.get_data.get_errors :date => @date
+        app_data.close
+        unless @data.empty?
+          erb :log
+        else
+          erb :log_empty
+        end
+        #redirect "/log/errors/#{date_url}"
       else
-        erb :log_empty
+        @log_type = 'warnings'
+        @data = app_data.get_warnings :from_date => @from_date,
+                                    :to_date => @to_date,
+                                    :ord_type => params[:ord_type], :run_id => id
+        #@data = @app.get_data.get_warnings :date => @date
+        app_data.close
+        unless @data.empty?
+          erb :log
+        else
+          erb :log_empty
+        end
+        #redirect "/log/warnings/#{date_url}"
       end
-      #redirect "/log/errors/#{date_url}"
     else
-      @log_type = 'warnings'
-      @data = app_data.get_warnings :date => @date, :ord_type => params[:ord_type], :run_id => id
-      #@data = @app.get_data.get_warnings :date => @date
-      app_data.close
-      unless @data.empty?
-        erb :log
-      else
-        erb :log_empty
-      end
-      #redirect "/log/warnings/#{date_url}"
+      #bad date format
+      erb :invalid_date
     end
   end
   
