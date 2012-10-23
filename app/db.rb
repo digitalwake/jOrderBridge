@@ -13,9 +13,8 @@ class DB
 	  if parms[:db] == 'as400'
 	    begin
 	   	  @connection ||= java.sql.DriverManager.get_connection "jdbc:as400://S2K/",parms[:user], parms[:pass]
-	   	rescue java.sql.SQLException
-	   	  puts "Error connection to iSeries. Error code: #{SQLException.getErrorCode()}
-	   	        SQL State: #{java.sql.SQLException.getSQLState()}."
+	   	rescue java.sql.SQLException => e
+	   	  puts "Error connecting to iSeries./nError code: #{e}/nSQL State: #{e}./n#{e}"
 	   	end
 	   	  
   	  #rs = @connection.createStatement.executeQuery("SELECT EHCMP,EHTYPE,EHCUST,EHPONO,EHSHIP,EHDDT8 FROM t37files.vedxpohw")
@@ -23,12 +22,13 @@ class DB
 		 else
 		   begin
 		     @connection ||= java.sql.DriverManager.getConnection "jdbc:sqlite:#{@@current_directory}/data/orderbridge.sqlite3"
-		   rescue SQLException
-	   	   puts "Error connection to iSeries. Error code: #{SQLException.getErrorCode()}
-	   	        SQL State: #{SQLException.getSQLState()}."
+		   rescue SQLException => e
+	   	   puts "Error connection to iSeries. Error code: #{java.sql.SQLException.getErrorCode()}
+	   	        SQL State: #{e.getSQLState()}."
 	   	 end
 		 end
-		 @stmt = @connection.createStatement
+		 
+		 @stmt = @connection.createStatement unless @connection.nil?
 	end
 
 	def qry(sql)

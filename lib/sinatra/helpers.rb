@@ -46,6 +46,14 @@ module Sinatra
       url '/current'
     end
     
+    def restrictions_url
+      url '/restrictions'
+    end
+    
+    def authorizations_url
+      url '/authorizations'
+    end
+    
   end
   
   helpers Helpers

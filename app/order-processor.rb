@@ -148,6 +148,14 @@ class OrderProcessor
 		@data.maintenance :type => "weight"
 	end
 	
+	def maintain_authorizations
+		@data.maintenance :type => "auth"
+	end
+	
+	def maintain_restrictions
+		@data.maintenance :type => "restricted_items"
+	end
+	
 	def close
 		@database_handle.close
 		@data.close
@@ -158,8 +166,9 @@ class OrderProcessor
 	#protected
 	def prepare(parms = {})
 	
-	  @run_id = @data.new_run_id
-	  puts "Order Processor Run id is: #{@run_id}"
+#	  @run_id = @data.new_run_id
+#	  puts "Order Processor Run id is: #{@run_id}"
+#    @run_date = Time.now.strftime("%Y-%m-%d %H:%M:%S")
 			
 		doe_service = DoeOrders.new
 		doe_service.pass = parms[:doe_pass]
@@ -254,7 +263,6 @@ class OrderProcessor
 		#If we have no results log the error and exit with a failure
 		if rs.empty?
 			@data.log  :type => 'E',  #Error
-			           :run_id => @run_id,
 			           :cust => @cust_num,
 								 :ship => @ship_to,
 								 :order => @purchase_order,
@@ -291,7 +299,6 @@ class OrderProcessor
 			#Log Warnings
 			if donated_count > 1
 				@data.log :type => 'W',   #Warning
-				          :run_id => @run_id,
 				          :cust => @cust_num,
 								 	:ship => @ship_to,
 								 	:order => @purchase_order,
@@ -306,7 +313,6 @@ class OrderProcessor
 			
 			if purchased_count > 1
 				@data.log :type => 'W',
-				          :run_id => @run_id,
 				          :cust => @cust_num,
 								 	:ship => @ship_to,
 								 	:order => @purchase_order,
@@ -362,39 +368,54 @@ class OrderProcessor
 				@qty = child['ordered_quantity'].to_i
 				@item_dsc = child['item_name']
 				
-				#Iterate while looking for Drop Shipments
-				@item = "0" unless self.set_s2k_item_and_weight
-				unit =  @data.item_to_break(@item)
-				#puts "uom = #{unit}"
-				if unit == 'EA'
-					unless @item.include? "-BC"	
-						@item.strip!
-						@item += "-BC"
-					end
-				end
-				@qty = @data.item_weight_to_qty(@item, @qty, @item_weight)
-				if drop_ship?(@item)
-					drop_ship_orderline += 1
-					@drop_ship = true
-					@writer.write_order_detail_drop_ship(@database_handle, @cust_num, @purchase_order,
+				if @data.authorized?(@spec_num, @ship_to)	
+				  #Iterate while looking for Drop Shipments
+				  @item = "0" unless self.set_s2k_item_and_weight
+				  unit =  @data.item_to_break(@item)
+				  #puts "uom = #{unit}"
+				  if unit == 'EA'
+					  unless @item.include? "-BC"	
+						  @item.strip!
+						  @item += "-BC"
+					  end
+				  end
+				  @qty = @data.item_weight_to_qty(@item, @qty, @item_weight)
+				  if drop_ship?(@item)
+					  drop_ship_orderline += 1
+					  @drop_ship = true
+					  @writer.write_order_detail_drop_ship(@database_handle, @cust_num, @purchase_order,
 																								drop_ship_orderline, @item, @spec_num, unit, @ship_to, @qty) unless @item == "0"
-				else
-					orderline += 1
-					@writer.write_order_detail(@database_handle, @cust_num, @purchase_order, orderline, @item, @spec_num, unit, @ship_to, @qty) unless @item == "0"
-				end
-			end #of details block
+				  else
+					  orderline += 1
+					  @writer.write_order_detail(@database_handle, @cust_num, @purchase_order, orderline, @item, @spec_num, unit, @ship_to, @qty) unless @item == "0"
+				  end
+				 else
+		      @data.log :type => 'W',
+				          :run_date => @run_date,
+				          :cust => @cust_num,
+								 	:ship => @ship_to,
+								 	:order => @purchase_order,
+								 	:date => @delivery_date,
+								 	:qty  => @qty,
+								 	:cust_item => @spec_num,
+                  :item_dsc => @item_dsc,
+                  :item => @item,
+                  :ord_type => ord_type,
+								 	:msg => 'Customer Not Authorzed for Item'
+		  
+		      end
+			  end #of details block
 			
-			if @drop_ship == true
-				@writer.write_order_header_drop_ship(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
+			  if @drop_ship == true
+				  @writer.write_order_header_drop_ship(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
 				#set drop ship to no for the next run since the drop ships have been processed
-				@drop_ship = false				
-			end
+				  @drop_ship = false				
+			  end
 			
-			if orderline > 0
-				@writer.write_order_header(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
-			end
-		end
-		#@database_handle.close
+			  if orderline > 0
+				  @writer.write_order_header(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
+			  end
+		  end
 		return true
   end
 	#private_class_method :prepare, :process_order_header, :process_order_detail

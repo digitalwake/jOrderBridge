@@ -1,0 +1,29 @@
+<div class="center hero-unit">
+  <h1>Maintain Authorized Customers</h1>
+
+  <h2>
+    This is a list of customers that are authorized to buy <%= link_to restrictions_url,"restricted items" %>.
+  </h2>
+  <table>
+  <tr>
+  <% @data[0].each_key do |col| %>
+    <td><%= col %></td>
+    <% end %>
+    <td>Action</td>
+  </tr>
+  <% @data.each do |hsh| %>
+    <tr>
+    <% hsh.each_value do |val| %>
+      <td><%= val %></td>
+      <% end %>
+      <td><form action= <%= url "/authorizations" %> method="post">
+      <input type="hidden" name="customer" value=<%= "'#{hsh["customer"]}'" %> />
+      <input type="submit" name="_method" value="Delete" /></form></td>
+    </tr>
+  <% end %>
+  </table>
+  <form action= <%= url "/authorizations" %> method="post">
+  Customer to add: <input type="text" name="customer" /><br />
+  <input type="submit" value="Submit" /></form>
+    
+</div>

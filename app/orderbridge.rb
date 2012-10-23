@@ -112,13 +112,15 @@ class OrderBridge < Sinatra::Base
   
   post "/log" do
     if params[:from_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and
-        params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/
+        params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and
+        params[:run_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/
       @from_date = params[:from_date][6..9].to_s + params[:from_date][0..1].to_s + params[:from_date][3..4].to_s
       @to_date = params[:to_date][6..9].to_s + params[:to_date][0..1].to_s + params[:to_date][3..4].to_s
       @order_type = params[:ord_type]
+      @run_date = params[:run_date][6..9].to_s + "-" + params[:run_date][0..1].to_s + "-" + params[:run_date][3..4].to_s
       app_data = AppData.new
-      id = app_data.run_id?
-      puts "The Current Run_id is: #{id}"
+#     id = app_data.run_id?
+      puts "The Current Run_date is: #{@run_date}"
       puts ""
       puts "From Date is: #{@from_date}"
       puts "To Date is: #{@to_date}"
@@ -127,7 +129,7 @@ class OrderBridge < Sinatra::Base
         @log_type = 'errors'
         @data = app_data.get_errors :from_date => @from_date,
                                   :to_date => @to_date,
-                                  :ord_type => @order_type, :run_id => id 
+                                  :ord_type => @order_type, :run_date => @run_date 
         #@data = @app.get_data.get_errors :date => @date
         app_data.close
         unless @data.empty?
@@ -140,7 +142,7 @@ class OrderBridge < Sinatra::Base
         @log_type = 'warnings'
         @data = app_data.get_warnings :from_date => @from_date,
                                     :to_date => @to_date,
-                                    :ord_type => params[:ord_type], :run_id => id
+                                    :ord_type => params[:ord_type], :run_date => @run_date
         #@data = @app.get_data.get_warnings :date => @date
         app_data.close
         unless @data.empty?
@@ -160,19 +162,19 @@ class OrderBridge < Sinatra::Base
   get "/log-details?" do
     app_data = AppData.new
     puts "Item paramter = #{params[:item].gsub(/\+/," ")}"
-    id = app_data.run_id?
-    puts "The Current Run_id is: #{id}"
+    @run_date = params[:run_date]
+    puts "The Current Run_date is: #{@run_date}"
     if params[:log_type] == 'errors'
       @log_type = 'errors'
       @data = app_data.get_error_orders_for_item :date => params[:order_date],
-                                                 :run_id => id,
+                                                 :run_date => @run_date,
                                                  :item => params[:item].gsub(/\+/," "),
                                                  :ord_type => params[:order_type]
       #@data = @app.get_data.get_error_orders_for_item :date => params[:date], :item => params[:item]
     else
       @log_type = 'warnings'
       @data = app_data.get_warning_orders_for_item :date => params[:order_date],
-                                                 :run_id => id,
+                                                 :run_date => @run_date,
                                                  :item => params[:item].gsub(/\+/," "),
                                                  :ord_type => params[:order_type]
       #@data = @app.get_data.get_warning_orders_for_item :date => params[:date], :item => params[:item]
@@ -249,6 +251,66 @@ class OrderBridge < Sinatra::Base
     app_data.close
     #erb :weight_to_cases
     redirect to "/weight-to-case"
+  end
+  
+  get "/restrictions" do
+    app_data = AppData.new
+    @data = app_data.get_restricted_items
+    app_data.close
+    unless @data.empty?
+      erb :restrictions
+    else
+      erb :no_prefs_restrictions
+    end
+  end
+  
+  get "/authorizations" do
+    app_data = AppData.new
+    @data = app_data.get_authorized_customers
+    app_data.close
+    unless @data.empty?
+      erb :authorizations
+    else
+     erb :no_prefs_authorizations
+    end
+  end
+  
+  post "/authorizations" do
+    app_data = AppData.new
+    puts "Authorized Customer = #{params[:customer]}"
+    app_data.maintain "authorizations", 'A', :customer => params[:customer]
+    @data = app_data.get_authorized_customers
+    app_data.close
+    #erb :items_to_break
+    redirect to "/authorizations"
+  end
+  
+  post "/restrictions" do
+    app_data = AppData.new
+    puts "Restricted Item = #{params[:item]}"
+    app_data.maintain "restricted_items", 'A', :item => params[:item]
+    @data = app_data.get_restricted_items
+    app_data.close
+    #erb :items_to_break
+    redirect to "/restrictions"
+  end
+  
+  delete "/authorizations" do
+    app_data = AppData.new
+    app_data.maintain "authorizations", 'D', :customer => params[:customer]
+    @data = app_data.get_authorized_customers
+    app_data.close
+    #erb :weight_to_cases
+    redirect to "/authorizations"
+  end
+  
+  delete "/restrictions" do
+    app_data = AppData.new
+    app_data.maintain "restricted_items", 'D', :item => params[:item]
+    @data = app_data.get_restricted_items
+    app_data.close
+    #erb :weight_to_cases
+    redirect to "/restrictions"
   end
 
 end

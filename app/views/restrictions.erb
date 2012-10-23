@@ -1,0 +1,29 @@
+<div class="center hero-unit">
+  <h1>Maintain Item Restrictions</h1>
+
+  <h2>
+    This is a list of items that are restricted. The may only be purchased by <%= link_to authorizations_url,"Authorized Customers" %>.
+  </h2>
+  <table>
+  <tr>
+  <% @data[0].each_key do |col| %>
+    <td><%= col %></td>
+    <% end %>
+    <td>Action</td>
+  </tr>
+  <% @data.each do |hsh| %>
+    <tr>
+    <% hsh.each_value do |val| %>
+      <td><%= val %></td>
+      <% end %>
+      <td><form action= <%= url "/restrictions" %> method="post">
+      <input type="hidden" name="item" value=<%= "'#{hsh["item"]}'" %> />
+      <input type="submit" name="_method" value="Delete" /></form></td>
+    </tr>
+  <% end %>
+  </table>
+  <form action= <%= url "/restrictions" %> method="post">
+  Item to add: <input type="text" name="item" /><br />
+  <input type="submit" value="Submit" /></form>
+    
+</div>
