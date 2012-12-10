@@ -34,27 +34,31 @@ class OrderBridge < Sinatra::Base
   post "/download_advanced" do
     app = OrderProcessor.new
     success = false
-    fdate = params[:from_date][0..1].to_s + params[:from_date][3..4].to_s + params[:from_date][6..9].to_s
-    tdate = params[:to_date][0..1].to_s + params[:to_date][3..4].to_s + params[:to_date][6..9].to_s
-    #puts "The form has posted."
-    puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}
-          fdate = #{fdate} and tdate = #{tdate}"
     if params[:from_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and 
-       params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and
-       fdate.to_i < tdate.to_i
+       params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/
+       
+      #puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}"
+            
+      fromDateToCheck = Date.strptime(params[:from_date],'%m/%d/%Y')
+      toDateToCheck = Date.strptime(params[:to_date],'%m/%d/%Y')
       
-      puts "Connecting and downloading orders"
-      success = app.download :doe_user => params[:user],
+      #puts "fromDateToCheck = #{fromDateToCheck} and toDateToCheck = #{toDateToCheck}"
+   
+      if fromDateToCheck < toDateToCheck
+      
+        puts "Connecting and downloading orders"
+        success = app.download :doe_user => params[:user],
                     :doe_pass => params[:pass],
                     :advanced => 'Y',
                     :date => params[:from_date],
                     :end_date => params[:to_date],
                     :boro => ""
                     
-      if success == true
-        erb :download_success
-      else
-        erb :failure
+        if success == true
+          erb :download_success
+        else
+          erb :failure
+        end
       end
     end
   end
@@ -108,39 +112,44 @@ class OrderBridge < Sinatra::Base
   end
   
   post "/advanced" do
+    puts "post/advanced"
     app = OrderProcessor.new
     success = false
-    fdate = params[:from_date][0..1].to_s + params[:from_date][3..4].to_s + params[:from_date][6..9].to_s
-    tdate = params[:to_date][0..1].to_s + params[:to_date][3..4].to_s + params[:to_date][6..9].to_s
-    #puts "The form has posted."
-    puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}
-          fdate = #{fdate} and tdate = #{tdate}"
     if params[:from_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and 
-       params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and
-       fdate.to_i < tdate.to_i
+       params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/
        
-      puts "Connecting and downloading orders"
-      success = app.prepare :doe_user => params[:user],
+      #puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}"
+            
+      fromDateToCheck = Date.strptime(params[:from_date],'%m/%d/%Y')
+      toDateToCheck = Date.strptime(params[:to_date],'%m/%d/%Y')
+      
+      #puts "fromDateToCheck = #{fromDateToCheck} and toDateToCheck = #{toDateToCheck}"
+   
+      if fromDateToCheck < toDateToCheck
+       
+        puts "Connecting and downloading orders"
+        success = app.prepare :doe_user => params[:user],
                     :doe_pass => params[:pass],
                     :advanced => 'Y',
                     :date => params[:from_date],
                     :end_date => params[:to_date],
                     :boro => ""
                     
-      if success == true
-        puts "Processing Advanced orders and uploading to S2K"
-        success = app.process
-        puts "Closing connections"
-        flash[:notice] = app.close
-        puts "Processing complete"
-      end
-      if success
-        redirect to '/success' 
+        if success == true
+          puts "Processing Advanced orders and uploading to S2K"
+          success = app.process
+          puts "Closing connections"
+          flash[:notice] = app.close
+          puts "Processing complete"
+        end
+        if success
+          redirect to '/success' 
+        else
+          redirect to '/fail'
+        end
       else
-        redirect to '/fail'
+        erb :invalid_date
       end
-    else
-      erb :invalid_date
     end
   end
   
