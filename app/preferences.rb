@@ -1,4 +1,4 @@
-require 'app/app-data.rb'
+require './app/app-data.rb'
 
 class Preferences
   

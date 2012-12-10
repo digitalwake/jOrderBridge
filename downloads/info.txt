@@ -1,0 +1,9 @@
+WSDL query started at 2012-11-05 17:49:27 -0500
+http://www.opt-osfns.org/
+http://www.opt-osfns.org/osfns/resources/sfordering/SFWebService.asmx
+get_orders_xml_today
+get_orders_xml_all_boros
+get_orders_xml_today_final
+get_orders_xml_all_boros_final
+get_orders_xml
+get_orders_date_range_xml

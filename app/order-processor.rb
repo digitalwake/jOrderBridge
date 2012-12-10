@@ -1,12 +1,12 @@
 require 'rubygems'
 require 'savon'
 require 'nokogiri'
-require 'app/db'
+require './app/db'
 require 'java'
-require 'app/doe.rb'
-require 'app/order-writer.rb'
-require 'app/app-data.rb'
-require 'app/log-writer.rb'
+require './app/doe.rb'
+require './app/order-writer.rb'
+require './app/app-data.rb'
+require './app/log-writer.rb'
 
 class OrderProcessor
 
@@ -163,6 +163,68 @@ class OrderProcessor
     #@log.close
 	end
 	
+	def download(parms = {})
+	  doe_service = DoeOrders.new
+		doe_service.pass = parms[:doe_pass]
+		doe_service.vendor_id = parms[:doe_user]
+		doe_service.date = parms[:date]
+		
+		#Archive and clear the previous log.
+		#@data.clear_log
+		
+		if parms[:advanced]=='N'
+		  @advanced = false
+			doe_service.locked_flag = parms[:lock] == 'Y' ? true : false
+			@orders = doe_service.get_current_orders
+		else
+		  @advanced = true
+			doe_service.end_date = parms[:end_date]
+			doe_service.boro = parms[:boro]
+			
+			@orders = doe_service.get_advanced_orders
+		end
+		return true
+	end
+	
+	def process_download(params = {})
+	  #Get XML orders from the File
+	  puts "#{params[:datafile][:tempfile].path}"
+		doc = Nokogiri::XML(open(params[:datafile][:tempfile].path))			
+
+		#A NodeSet of the child elements - The DOE WebService names the elements "elements"
+		@ns = doc.xpath("//elements")
+		if @ns.empty?
+		  return false
+		end
+		#@error_message = doc.xpath("//error_message")
+		
+		if params[:advanced]=='N'
+		  @advanced = false
+		else
+		  @advanced = true
+		end
+		
+		#Connect to S2K via JDBC and get a handle
+		@database_handle ||= DB.new :db => 'as400', :user => @system_user, :pass => @system_pass
+				
+		#Get item info
+		@item_master = @database_handle.qry("SELECT DISTINCT #{@@library_prefix}MODSDTA.VCOITEM.ONITEM, #{@@library_prefix}MODSDTA.VCOITEM.ONCITM,
+																						#{@@library_prefix}FILES.FINITEM.FICDONATED, #{@@library_prefix}FILES.FINITEM.FICBRAND, #{@@library_prefix}FILES.VINITEM.ICDSC1, 
+																						#{@@library_prefix}FILES.VINITEM.ICWGHT,
+																						#{@@library_prefix}FILES.VINITEM.ICDEL, #{@@library_prefix}MODSDTA.VCOITEM.ONCUST, #{@@library_prefix}FILES.VINITMB.IFDROP 
+																						FROM (#{@@library_prefix}FILES.VINITEM INNER JOIN #{@@library_prefix}MODSDTA.VCOITEM ON 
+																						(#{@@library_prefix}FILES.VINITEM.ICITEM = #{@@library_prefix}MODSDTA.VCOITEM.ONITEM)) INNER JOIN #{@@library_prefix}FILES.FINITEM ON 
+																						#{@@library_prefix}MODSDTA.VCOITEM.ONITEM = #{@@library_prefix}FILES.FINITEM.FICITEM INNER JOIN #{@@library_prefix}FILES.VINITMB ON 
+																						#{@@library_prefix}FILES.VINITMB.IFITEM=#{@@library_prefix}FILES.FINITEM.FICITEM WHERE 
+																						(((#{@@library_prefix}MODSDTA.VCOITEM.ONCUST)='100000 ')) AND ICDEL <> 'I' order by #{@@library_prefix}MODSDTA.VCOITEM.ONITEM")#.fetch(:all,:Struct)
+		#@item_master = @database_handle.rs_to_hash(rs)													
+																						
+		#Clear EDI tables
+		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpohw")
+		@database_handle.update_qry("delete from #{@@library_prefix}files.vedxpodh")
+		
+		self.process_from_file		
+  end
 	#protected
 	def prepare(parms = {})
 	
@@ -367,6 +429,83 @@ class OrderProcessor
 				@spec_num = child['item_key']
 				@qty = child['ordered_quantity'].to_i
 				@item_dsc = child['item_name']
+				
+				if @data.authorized?(@spec_num, @ship_to)	
+				  #Iterate while looking for Drop Shipments
+				  @item = "0" unless self.set_s2k_item_and_weight
+				  unit =  @data.item_to_break(@item)
+				  #puts "uom = #{unit}"
+				  if unit == 'EA'
+					  unless @item.include? "-BC"	
+						  @item.strip!
+						  @item += "-BC"
+					  end
+				  end
+				  @qty = @data.item_weight_to_qty(@item, @qty, @item_weight)
+				  if drop_ship?(@item)
+					  drop_ship_orderline += 1
+					  @drop_ship = true
+					  @writer.write_order_detail_drop_ship(@database_handle, @cust_num, @purchase_order,
+																								drop_ship_orderline, @item, @spec_num, unit, @ship_to, @qty) unless @item == "0"
+				  else
+					  orderline += 1
+					  @writer.write_order_detail(@database_handle, @cust_num, @purchase_order, orderline, @item, @spec_num, unit, @ship_to, @qty) unless @item == "0"
+				  end
+				 else
+		      @data.log :type => 'W',
+				          :run_date => @run_date,
+				          :cust => @cust_num,
+								 	:ship => @ship_to,
+								 	:order => @purchase_order,
+								 	:date => @delivery_date,
+								 	:qty  => @qty,
+								 	:cust_item => @spec_num,
+                  :item_dsc => @item_dsc,
+                  :item => @item,
+                  :ord_type => ord_type,
+								 	:msg => 'Customer Not Authorzed for Item'
+		  
+		      end
+			  end #of details block
+			
+			  if @drop_ship == true
+				  @writer.write_order_header_drop_ship(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
+				#set drop ship to no for the next run since the drop ships have been processed
+				  @drop_ship = false				
+			  end
+			
+			  if orderline > 0
+				  @writer.write_order_header(@database_handle, @purchase_order, @cust_num, @ship_to, @delivery_date, @special_instructions)
+			  end
+		  end
+		return true
+  end
+  
+  def process_from_file
+		#Iterate through the orders (elements marked "elements")
+		#puts "Process called."
+		i=0
+		@ns.each do |node| 
+			@purchase_order = node.at_xpath("order_id").content
+			@delivery_date = self.get_date(node.at_xpath("delivery_date").content)
+			if @delivery_date == 0
+				puts "Invalid Delivery Date in Webservice"
+				return false
+			end
+			@ship_to = node.at_xpath("school_id").content.to_i
+			@cust_num = ((@ship_to/1000)*1000)+999
+#			@special_instructions = node.at_xpath("special_instruction").content
+			
+			i += 1
+			puts "Orders: #{i}" #indexing starts at zero
+				
+			#Iterate through the element details while looking for drop shipments
+			orderline = 0
+			drop_ship_orderline = 0
+			node.xpath('items').children.each do |item|
+				@spec_num = item['item_key']
+				@qty = item['ordered_quantity'].to_i
+				@item_dsc = item['item_name']
 				
 				if @data.authorized?(@spec_num, @ship_to)	
 				  #Iterate while looking for Drop Shipments

@@ -1,6 +1,6 @@
-require 'app/order-processor.rb'
-require 'lib/sinatra/helpers.rb'
-require 'app/app-data.rb'
+require './app/order-processor.rb'
+require './lib/sinatra/helpers.rb'
+require './app/app-data.rb'
 require 'sinatra/base'
 require 'sinatra/flash'
 
@@ -21,6 +21,86 @@ class OrderBridge < Sinatra::Base
     #session['counter'] ||= 0
     #session['counter'] += 1
     erb :home
+  end
+  
+  get "/download_advanced" do
+    erb :download_advanced
+  end
+  
+  get "/download" do
+    erb :download
+  end
+  
+  post "/download_advanced" do
+    app = OrderProcessor.new
+    success = false
+    fdate = params[:from_date][0..1].to_s + params[:from_date][3..4].to_s + params[:from_date][6..9].to_s
+    tdate = params[:to_date][0..1].to_s + params[:to_date][3..4].to_s + params[:to_date][6..9].to_s
+    #puts "The form has posted."
+    puts "The from date was: #{params[:from_date]} and the to date was: #{params[:to_date]}
+          fdate = #{fdate} and tdate = #{tdate}"
+    if params[:from_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and 
+       params[:to_date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/ and
+       fdate.to_i < tdate.to_i
+      
+      puts "Connecting and downloading orders"
+      success = app.download :doe_user => params[:user],
+                    :doe_pass => params[:pass],
+                    :advanced => 'Y',
+                    :date => params[:from_date],
+                    :end_date => params[:to_date],
+                    :boro => ""
+                    
+      if success == true
+        erb :download_success
+      else
+        erb :failure
+      end
+    end
+  end
+  
+  post "/download" do
+    app = OrderProcessor.new
+    success = false
+    puts "Connecting and downloading orders"
+    #Check for proper date format (mm/dd/yyyy)
+    if params[:date] =~ /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d$/
+      success = app.download :doe_user => params[:user],
+                    :doe_pass => params[:pass],
+                    :advanced => 'N',
+                    :lock => params[:lock],
+                    :date => params[:date]
+                    
+      if success == true
+        erb :download_success
+      end
+    end
+  end
+  
+  get "/process_file" do
+    erb :process_file
+  end
+  
+  post "/process_file_current" do
+    app = OrderProcessor.new
+    params[:advanced] ='N'
+    success = app.process_download(params)
+    if success == true
+      erb :success
+    else
+      erb :failure
+    end
+  end
+  
+   post "/process_file_advanced" do
+    app = OrderProcessor.new
+    params[:advanced] ='Y'
+    success = app.process_download(params)
+    if success == true
+      erb :success
+    else
+      erb :failure
+    end
   end
   
   get "/advanced" do

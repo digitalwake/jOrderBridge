@@ -1,5 +1,5 @@
 require 'sinatra/base'
-require 'app/app-data.rb'
+require './app/app-data.rb'
 
 module Sinatra
   module Helpers
@@ -52,6 +52,10 @@ module Sinatra
     
     def authorizations_url
       url '/authorizations'
+    end
+    
+    def process_file_url
+      url '/process_file'
     end
     
   end

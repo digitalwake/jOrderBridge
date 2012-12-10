@@ -1,5 +1,5 @@
 require 'java'
-require 'lib/jt400-6.1'
+require './lib/jt400-6.1'
 require 'date'
 require 'bigdecimal'
 

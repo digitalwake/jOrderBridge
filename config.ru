@@ -1,5 +1,5 @@
-require 'app/orderbridge'
+require './app/orderbridge'
 
-#$servlet_context.getRealPath("/WEB-INF")
+$LOAD_PATH.unshift(".")
 
 run OrderBridge.new

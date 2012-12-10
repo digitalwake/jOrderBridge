@@ -1,0 +1,23 @@
+<div class="center hero-unit">
+  <h1>File Processing</h1>
+
+  <h2>
+    Process a downloaded xml file. 
+  </h2>
+     <% if flash[:notice] %>
+      <h3>
+      <%= flash[:notice] %>
+      </h3>
+     <% end %>
+     <h3>Process as Current Orders</h3>
+    <form action=<%= url "/process_file_current" %> enctype="multipart/form-data" method="post">
+      <input name="datafile" type="file">
+    <input type="submit" value="Process">
+    </form>
+    <h3>Process as Advanced Orders</h3>
+    <form action=<%= url "/process_file_advanced" %> enctype="multipart/form-data" method="post">
+      <input name="datafile" type="file">
+    <input type="submit" value="Process">
+    </form>
+    
+</div>

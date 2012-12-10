@@ -3,12 +3,12 @@ require 'savon'
 
 class DoeOrders
 
-@@current_log_file = "tmp/current_orders"
-@@advanced_log_file = "tmp/advanced_orders"
-@@wsdl_info = "./tmp/info.txt"
+@@current_log_file = "downloads/current_orders"
+@@advanced_log_file = "downloads/advanced_orders"
+@@wsdl_info = "./downloads/info.txt"
 
 	def initialize
-		Dir.mkdir('./tmp') unless File.directory?('./tmp')
+		Dir.mkdir('./downloads') unless File.directory?('./downloads')
 		@vendor_id = ""
 		@pass = ""
 		@date = ""

@@ -1,0 +1,16 @@
+<div class="center hero-unit">
+  <h1>Success</h1>
+
+  <h2>
+    Downloading of Orders has completed succesfully 
+  </h2>
+     <% if flash[:notice] %>
+      <h3>
+      <%= flash[:notice] %>
+      </h3>
+     <% end %>
+    <form action=<%= url "/process_file" %> enctype="multipart/form-data" method="post">
+      File to Process: <input name="datafile" type="file">
+    <input type="submit" value="Process">
+    
+</div>

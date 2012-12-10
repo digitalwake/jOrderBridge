@@ -1,0 +1,16 @@
+<div class="center hero-unit">
+  <h1>Download Advanced Orders</h1>
+
+  <h2>
+    This is where you can download future orders as a file to be imported later.
+  </h2>
+  <p>Please specify a date range by entering a "from" date and a "to" date below:</p>
+  <form action= <%= url "/download_advanced" %> method="post">
+  DOE User: <input type="text" name="user" /><br />
+  DOE Password: <input type="password" name="pass" /><br />
+  From date (MM/DD/YYYY): <input type="text" name="from_date" /><br />
+  To date (MM/DD/YYYY): <input type="text" name="to_date" /><br />
+  <input type="submit" value="Submit" />
+</form>
+
+</div>
