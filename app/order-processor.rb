@@ -209,13 +209,13 @@ class OrderProcessor
 				
 		#Get item info
 		@item_master = @database_handle.qry("SELECT DISTINCT #{@@library_prefix}MODSDTA.VCOITEM.ONITEM, #{@@library_prefix}MODSDTA.VCOITEM.ONCITM,
-																						#{@@library_prefix}FILES.FINITEM.FICDONATED, #{@@library_prefix}FILES.FINITEM.FICBRAND, #{@@library_prefix}FILES.VINITEM.ICDSC1, 
+																						#{@@library_prefix}MODSDTA.FINITEM.FICDONATED, #{@@library_prefix}MODSDTA.FINITEM.FICBRAND, #{@@library_prefix}FILES.VINITEM.ICDSC1, 
 																						#{@@library_prefix}FILES.VINITEM.ICWGHT,
 																						#{@@library_prefix}FILES.VINITEM.ICDEL, #{@@library_prefix}MODSDTA.VCOITEM.ONCUST, #{@@library_prefix}FILES.VINITMB.IFDROP 
 																						FROM (#{@@library_prefix}FILES.VINITEM INNER JOIN #{@@library_prefix}MODSDTA.VCOITEM ON 
-																						(#{@@library_prefix}FILES.VINITEM.ICITEM = #{@@library_prefix}MODSDTA.VCOITEM.ONITEM)) INNER JOIN #{@@library_prefix}FILES.FINITEM ON 
-																						#{@@library_prefix}MODSDTA.VCOITEM.ONITEM = #{@@library_prefix}FILES.FINITEM.FICITEM INNER JOIN #{@@library_prefix}FILES.VINITMB ON 
-																						#{@@library_prefix}FILES.VINITMB.IFITEM=#{@@library_prefix}FILES.FINITEM.FICITEM WHERE 
+																						(#{@@library_prefix}FILES.VINITEM.ICITEM = #{@@library_prefix}MODSDTA.VCOITEM.ONITEM)) INNER JOIN #{@@library_prefix}MODSDTA.FINITEM ON 
+																						#{@@library_prefix}MODSDTA.VCOITEM.ONITEM = #{@@library_prefix}MODSDTA.FINITEM.FICITEM INNER JOIN #{@@library_prefix}FILES.VINITMB ON 
+																						#{@@library_prefix}FILES.VINITMB.IFITEM=#{@@library_prefix}MODSDTA.FINITEM.FICITEM WHERE 
 																						(((#{@@library_prefix}MODSDTA.VCOITEM.ONCUST)='100000 ')) AND ICDEL <> 'I' order by #{@@library_prefix}MODSDTA.VCOITEM.ONITEM")#.fetch(:all,:Struct)
 		#@item_master = @database_handle.rs_to_hash(rs)													
 																						
@@ -271,13 +271,13 @@ class OrderProcessor
 				
 		#Get item info
 		@item_master = @database_handle.qry("SELECT DISTINCT #{@@library_prefix}MODSDTA.VCOITEM.ONITEM, #{@@library_prefix}MODSDTA.VCOITEM.ONCITM,
-																						#{@@library_prefix}FILES.FINITEM.FICDONATED, #{@@library_prefix}FILES.FINITEM.FICBRAND, #{@@library_prefix}FILES.VINITEM.ICDSC1, 
+																						#{@@library_prefix}MODSDTA.FINITEM.FICDONATED, #{@@library_prefix}MODSDTA.FINITEM.FICBRAND, #{@@library_prefix}FILES.VINITEM.ICDSC1, 
 																						#{@@library_prefix}FILES.VINITEM.ICWGHT,
 																						#{@@library_prefix}FILES.VINITEM.ICDEL, #{@@library_prefix}MODSDTA.VCOITEM.ONCUST, #{@@library_prefix}FILES.VINITMB.IFDROP 
 																						FROM (#{@@library_prefix}FILES.VINITEM INNER JOIN #{@@library_prefix}MODSDTA.VCOITEM ON 
-																						(#{@@library_prefix}FILES.VINITEM.ICITEM = #{@@library_prefix}MODSDTA.VCOITEM.ONITEM)) INNER JOIN #{@@library_prefix}FILES.FINITEM ON 
-																						#{@@library_prefix}MODSDTA.VCOITEM.ONITEM = #{@@library_prefix}FILES.FINITEM.FICITEM INNER JOIN #{@@library_prefix}FILES.VINITMB ON 
-																						#{@@library_prefix}FILES.VINITMB.IFITEM=#{@@library_prefix}FILES.FINITEM.FICITEM WHERE 
+																						(#{@@library_prefix}FILES.VINITEM.ICITEM = #{@@library_prefix}MODSDTA.VCOITEM.ONITEM)) INNER JOIN #{@@library_prefix}MODSDTA.FINITEM ON 
+																						#{@@library_prefix}MODSDTA.VCOITEM.ONITEM = #{@@library_prefix}MODSDTA.FINITEM.FICITEM INNER JOIN #{@@library_prefix}FILES.VINITMB ON 
+																						#{@@library_prefix}FILES.VINITMB.IFITEM=#{@@library_prefix}MODSDTA.FINITEM.FICITEM WHERE 
 																						(((#{@@library_prefix}MODSDTA.VCOITEM.ONCUST)='100000 ')) AND ICDEL <> 'I' order by #{@@library_prefix}MODSDTA.VCOITEM.ONITEM")#.fetch(:all,:Struct)
 		#@item_master = @database_handle.rs_to_hash(rs)													
 																						
